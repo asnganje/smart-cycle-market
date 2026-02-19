@@ -1,29 +1,41 @@
-import { RequestHandler } from "express"
+import { RequestHandler } from "express";
 import AuthVerificationTokenModel from "src/models/AuthVerificationToken";
 import UserModel from "src/models/User";
-import crypto from "crypto"
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+import { sendErrorRes } from "src/utils/helper";
 
-export const sign_up: RequestHandler = async (req, res)=> {
-  const {name, email, password} = req.body;
-
-  if(!name) return res.status(422).json({message:"Name is missing!"})
-  if(!email) return res.status(422).json({message:"Email is missing!"})
-  if(!password) return res.status(422).json({message:"Password is missing!"})
-  try {
-    const existingUser = await UserModel.findOne({email})
+export const sign_up: RequestHandler = async (req, res) => {
+    const { name, email, password } = req.body;
+    if (!name) return sendErrorRes(res, "Name is missing", 422);
+    if (!email) return sendErrorRes(res, "Email is missing", 422);
+    if (!password) return sendErrorRes(res, "Password is missing", 422);
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(401).json({status:"failed", message:"Email already in use!"})
+      sendErrorRes(res, "Email is already in use", 401);
     }
-    const newUser = await UserModel.create({name, email, password})
-    const token = crypto.randomBytes(36).toString("hex")
-    await AuthVerificationTokenModel.create({owner: newUser._id, token})
-    const link = `http://localhost:3000/verify?id${newUser._id}&token=${token}`
-    res.send(link)
-  } catch (error) {
-    res.status(401).json({status:"fail", message:"Failed to create a user"})
-  }
-}
+    const newUser = await UserModel.create({ name, email, password });
+    const token = crypto.randomBytes(36).toString("hex");
+    await AuthVerificationTokenModel.create({ owner: newUser._id, token });
+    const link = `http://localhost:3000/verify?id${newUser._id}&token=${token}`;
 
-export const login: RequestHandler = (req, res)=> {
-  res.json({message: "Auth login route"})
-}
+    // Looking to send emails in production? Check out our Email API/SMTP product
+    const transport = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
+      auth: {
+        user: "9e7fec9eabe457",
+        pass: "924670c6802ce4",
+      },
+    });
+    await transport.sendMail({
+      from: "verification@myapp.com",
+      to: newUser.email,
+      html: `<h1>Please click on <a href=${link}>this link</a> to verify your account<h1>`,
+    });
+    res.json({ message: "Please check your inbox" });
+};
+
+export const login: RequestHandler = (req, res) => {
+  res.json({ message: "Auth login route" });
+};
