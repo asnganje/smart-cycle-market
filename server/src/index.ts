@@ -2,18 +2,21 @@ import express from "express";
 import authRouter from "./routes/auth";
 import { connectDB } from "./db";
 import dotenv from "dotenv"
+import validate from "./middleware/validator";
+import { NewUserSchema } from "./utils/validationSchema";
 
 dotenv.config()
-
-// import bodyParser from "body-parser"
-
 const app = express();
 app.use(express.json());
 
 // reading content from a form
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/auth", authRouter);
+app.use("/auth", validate(NewUserSchema), authRouter);
+
+app.use(function(err, req, res, next){
+  res.status(500).json({message: err.message})
+} as express.ErrorRequestHandler)
 
 const port = 3000;
 const uri = process.env.URI
