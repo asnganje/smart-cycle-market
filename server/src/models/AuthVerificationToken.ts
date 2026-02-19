@@ -1,7 +1,20 @@
+import { compare, genSalt, hash } from "bcrypt";
+import { Document, Types } from "mongoose";
 import { model, Schema } from "mongoose";
 
+interface AuthVerificationDocument extends Document {
+  owner: Types.ObjectId,
+  token: string,
+  createdAt: Date
+}
 
-const AuthVerificationTokenSchema = new Schema({
+interface Methods {
+  compareToken(token: string): Promise<boolean>
+}
+
+
+
+const AuthVerificationTokenSchema = new Schema<AuthVerificationDocument, {}, Methods>({
   owner:{
     type: Schema.Types.ObjectId,
     ref:"User",
@@ -17,6 +30,18 @@ const AuthVerificationTokenSchema = new Schema({
     default:Date.now()
   }
 })
+
+AuthVerificationTokenSchema.pre("save", async function() {
+  const salt = await genSalt(10)
+  if(this.isModified("token")) {
+    this.token = await hash(this.token, salt)
+  }
+})
+
+AuthVerificationTokenSchema.methods.compareToken = async function(token) {
+  const isValid = await compare(token, this.token)
+  return isValid 
+}
 
 const AuthVerificationTokenModel = model("AuthVerificationToken", AuthVerificationTokenSchema)
 
