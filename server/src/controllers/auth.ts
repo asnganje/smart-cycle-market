@@ -4,6 +4,7 @@ import UserModel from "src/models/User";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import { sendErrorRes } from "src/utils/helper";
+import jwt from "jsonwebtoken"
 
 export const sign_up: RequestHandler = async (req, res) => {
     const { name, email, password } = req.body;
@@ -49,6 +50,30 @@ export const verifyEmail: RequestHandler = async(req, res) => {
   res.json({message:"Thanks for joining us, your email is verified!"})
 }
 
-export const login: RequestHandler = (req, res) => {
-  res.json({ message: "Auth login route" });
+export const login: RequestHandler = async (req, res) => {
+  const {email, password} = req.body
+  const user = await UserModel.findOne({email})
+  if (!user)return sendErrorRes(res, "Invalid email!", 403)
+  const isMacthed = await user.comparePassword(password)
+  if(!isMacthed) return sendErrorRes(res, "InvalidPassword", 422)
+
+  const payload = {id: user._id}
+  const accessToken = jwt.sign(payload, "secret", {
+    expiresIn:"15m"
+  })
+  const refreshToken = jwt.sign(payload, "secret")
+  if(!user.tokens){
+    user.tokens = [refreshToken]
+  } else {
+    user.tokens.push(refreshToken)
+  }
+  await user.save()
+  res.json({
+    profile:{
+      id:user._id,
+      email:user.email,
+      name: user.name,
+      tokens:{refresh: refreshToken, access: accessToken}
+    }
+  })
 };
