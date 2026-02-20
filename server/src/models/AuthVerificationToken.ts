@@ -5,16 +5,12 @@ import { model, Schema } from "mongoose";
 interface AuthVerificationDocument extends Document {
   owner: Types.ObjectId,
   token: string,
-  createdAt: Date
-}
-
-interface Methods {
+  createdAt: Date,
   compareToken(token: string): Promise<boolean>
 }
 
 
-
-const AuthVerificationTokenSchema = new Schema<AuthVerificationDocument, {}, Methods>({
+const AuthVerificationTokenSchema = new Schema<AuthVerificationDocument>({
   owner:{
     type: Schema.Types.ObjectId,
     ref:"User",
@@ -38,7 +34,7 @@ AuthVerificationTokenSchema.pre("save", async function() {
   }
 })
 
-AuthVerificationTokenSchema.methods.compareToken = async function(token) {
+AuthVerificationTokenSchema.methods.compareToken = async function(this: AuthVerificationDocument, token:string) {
   const isValid = await compare(token, this.token)
   return isValid 
 }
