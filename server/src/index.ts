@@ -6,6 +6,7 @@ import dotenv from "dotenv"
 dotenv.config()
 const app = express();
 app.use(express.json());
+app.use(express.static("src/public"))
 
 // reading content from a form
 app.use(express.urlencoded({ extended: false }));
