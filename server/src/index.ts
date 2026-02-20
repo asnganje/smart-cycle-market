@@ -2,8 +2,6 @@ import express from "express";
 import authRouter from "./routes/auth";
 import { connectDB } from "./db";
 import dotenv from "dotenv"
-import validate from "./middleware/validator";
-import { NewUserSchema } from "./utils/validationSchema";
 
 dotenv.config()
 const app = express();
@@ -12,7 +10,7 @@ app.use(express.json());
 // reading content from a form
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/auth", validate(NewUserSchema), authRouter);
+app.use("/auth", authRouter);
 
 app.use(function(err, req, res, next){
   res.status(500).json({message: err.message})
