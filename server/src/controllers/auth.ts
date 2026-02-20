@@ -36,6 +36,19 @@ export const sign_up: RequestHandler = async (req, res) => {
     res.json({ message: "Please check your inbox" });
 };
 
+export const verifyEmail: RequestHandler = async(req, res) => {
+  const id = req.body.id as string
+  const token = req.body.token as string 
+
+  const authToken = await AuthVerificationTokenModel.findOne({owner: id})
+  if (!authToken) return sendErrorRes(res, "Unauthorized request!", 403)
+  const isMatched = await authToken.compareToken(token)
+  if (!isMatched) return sendErrorRes(res, "Unauthorized request, invalid token!", 403)
+  await UserModel.findByIdAndUpdate(id, {verified: true})
+  await AuthVerificationTokenModel.findByIdAndDelete(authToken._id)
+  res.json({message:"Thanks for joining us, your email is verified!"})
+}
+
 export const login: RequestHandler = (req, res) => {
   res.json({ message: "Auth login route" });
 };
