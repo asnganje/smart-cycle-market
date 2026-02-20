@@ -5,14 +5,12 @@ interface UserDocument extends Document {
   name: string,
   email: string,
   password:string,
-  verified: boolean
-}
-
-interface Methods {
+  verified: boolean,
+  tokens: string[],
   comparePassword(password: string): Promise<boolean>
 }
 
-const UserSchema = new Schema<UserDocument, {}, Methods>(
+const UserSchema = new Schema<UserDocument>(
   {
     name: {
       type: String,
@@ -31,6 +29,7 @@ const UserSchema = new Schema<UserDocument, {}, Methods>(
       type: String,
       required: true,
     },
+   tokens: [String]
   },
   { timestamps: true },
 );
@@ -42,8 +41,8 @@ UserSchema.pre("save", async function () {
   }
 });
 
-UserSchema.methods.comparePassword = async function (
-  password
+UserSchema.methods.comparePassword = async function ( this: UserDocument,
+  password: string
 ) {
   const isValid = await compare(password, this.password);
   return isValid;
