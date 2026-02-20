@@ -5,6 +5,7 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import { sendErrorRes } from "src/utils/helper";
 import jwt from "jsonwebtoken"
+import { profile } from "console";
 
 export const sign_up: RequestHandler = async (req, res) => {
     const { name, email, password } = req.body;
@@ -77,3 +78,7 @@ export const login: RequestHandler = async (req, res) => {
     }
   })
 };
+
+export const sendProfile: RequestHandler = async (req, res) =>{
+  res.json({profile: req.user})
+}
