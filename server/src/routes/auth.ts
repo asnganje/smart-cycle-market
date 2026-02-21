@@ -1,5 +1,5 @@
 import express from "express";
-import { generateVerificationLink, login, sendProfile, sign_up, verifyEmail } from "src/controllers/auth";
+import { generateVerificationLink, grantAccessToken, login, sendProfile, sign_up, verifyEmail } from "src/controllers/auth";
 import { isAuth } from "src/middleware/auth";
 import validate from "src/middleware/validator";
 import { NewUserSchema, VerifyTokenSchema } from "src/utils/validationSchema";
@@ -11,5 +11,6 @@ authRouter.route("/verify").post(validate(VerifyTokenSchema), verifyEmail);
 authRouter.route("/login").post(login);
 authRouter.route("/verify-token").get(isAuth, generateVerificationLink);
 authRouter.route("/profile").get(isAuth, sendProfile);
+authRouter.route("/refresh-token").post(grantAccessToken);
 
 export default authRouter;
