@@ -5,7 +5,7 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import { sendErrorRes } from "src/utils/helper";
 import jwt from "jsonwebtoken"
-import { profile } from "console";
+import mail from "src/utils/mail";
 
 export const sign_up: RequestHandler = async (req, res) => {
     const { name, email, password } = req.body;
@@ -22,19 +22,20 @@ export const sign_up: RequestHandler = async (req, res) => {
     const link = `http://localhost:3000/verify.html?id=${newUser._id}&token=${token}`;
 
     // Looking to send emails in production? Check out our Email API/SMTP product
-    const transport = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
-      auth: {
-        user: "9e7fec9eabe457",
-        pass: "924670c6802ce4",
-      },
-    });
-    await transport.sendMail({
-      from: "verification@myapp.com",
-      to: newUser.email,
-      html: `<h1>Please click on <a href=${link}>this link</a> to verify your account<h1>`,
-    });
+    // const transport = nodemailer.createTransport({
+    //   host: "sandbox.smtp.mailtrap.io",
+    //   port: 2525,
+    //   auth: {
+    //     user: "9e7fec9eabe457",
+    //     pass: "924670c6802ce4",
+    //   },
+    // });
+    // await transport.sendMail({
+    //   from: "verification@myapp.com",
+    //   to: newUser.email,
+    //   html: `<h1>Please click on <a href=${link}>this link</a> to verify your account<h1>`,
+    // });
+    await mail.sendVerification(newUser.email, link)
     res.json({ message: "Please check your inbox" });
 };
 
@@ -49,6 +50,18 @@ export const verifyEmail: RequestHandler = async(req, res) => {
   await UserModel.findByIdAndUpdate(id, {verified: true})
   await AuthVerificationTokenModel.findByIdAndDelete(authToken._id)
   res.json({message:"Thanks for joining us, your email is verified!"})
+}
+
+export const generateVerificationLink: RequestHandler = async(req, res) => {
+  const { id, email } = req.user
+  const token = crypto.randomBytes(36).toString("hex")
+  const link = `http://localhost:3000/verify.html?id=${id}&token=${token}`;
+
+  await AuthVerificationTokenModel.findOneAndDelete({owner: id})
+
+  await AuthVerificationTokenModel.create({owner:id, token})
+  await mail.sendVerification(email, link)
+  res.json({message: "Please check your inbox"})
 }
 
 export const login: RequestHandler = async (req, res) => {
