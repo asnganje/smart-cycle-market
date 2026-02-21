@@ -6,10 +6,12 @@ import dotenv from "dotenv"
 import { sendErrorRes } from "src/utils/helper";
 import jwt from "jsonwebtoken";
 import mail from "src/utils/mail";
+import PassResetTokenModel from "src/models/PasswordResetToken";
 dotenv.config()
 
 const VERIFICATION_LINK = process.env.VERIFICATION_LINK
 const JWT_SECRET = process.env.JWT_SECRET!
+const PASSWORD_RESET_LINK=process.env.PASSWORD_RESET_LINK
 
 export const sign_up: RequestHandler = async (req, res) => {
   const { name, email, password } = req.body;
@@ -141,4 +143,17 @@ export const signOut: RequestHandler = async (req, res) => {
   user.tokens = newTokens
   await user.save()
   res.send()
+}
+
+export const generateForgetPassLink: RequestHandler = async (req, res) => {
+  const {email} = req.body
+
+  const user = await UserModel.findOne({email})
+  if(!user) return sendErrorRes(res, "Unauthorized User", 404)
+  await PassResetTokenModel.findOneAndDelete({owner:user._id})
+  const token = crypto.randomBytes(36).toString("hex");
+  await PassResetTokenModel.create({owner: user._id, token})
+  const passResetLink = `${PASSWORD_RESET_LINK}?id=${user._id}&token=${token}`
+  await mail.sendPassResetLink(user.email, passResetLink)
+  res.json({message:"Please check your email!"})
 }
