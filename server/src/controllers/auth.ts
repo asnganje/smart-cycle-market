@@ -2,10 +2,14 @@ import { RequestHandler } from "express";
 import AuthVerificationTokenModel from "src/models/AuthVerificationToken";
 import UserModel from "src/models/User";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import dotenv from "dotenv"
 import { sendErrorRes } from "src/utils/helper";
 import jwt from "jsonwebtoken";
 import mail from "src/utils/mail";
+dotenv.config()
+
+const VERIFICATION_LINK = process.env.VERIFICATION_LINK
+const JWT_SECRET = process.env.JWT_SECRET!
 
 export const sign_up: RequestHandler = async (req, res) => {
   const { name, email, password } = req.body;
@@ -19,7 +23,7 @@ export const sign_up: RequestHandler = async (req, res) => {
   const newUser = await UserModel.create({ name, email, password });
   const token = crypto.randomBytes(36).toString("hex");
   await AuthVerificationTokenModel.create({ owner: newUser._id, token });
-  const link = `http://localhost:3000/verify.html?id=${newUser._id}&token=${token}`;
+  const link = `${VERIFICATION_LINK}?id=${newUser._id}&token=${token}`;
 
   // Looking to send emails in production? Check out our Email API/SMTP product
   // const transport = nodemailer.createTransport({
@@ -56,7 +60,7 @@ export const verifyEmail: RequestHandler = async (req, res) => {
 export const generateVerificationLink: RequestHandler = async (req, res) => {
   const { id, email } = req.user;
   const token = crypto.randomBytes(36).toString("hex");
-  const link = `http://localhost:3000/verify.html?id=${id}&token=${token}`;
+  const link = `${VERIFICATION_LINK}?id=${id}&token=${token}`;
 
   await AuthVerificationTokenModel.findOneAndDelete({ owner: id });
 
@@ -69,7 +73,7 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) sendErrorRes(res, "Unauthorized request", 403);
-  const payload = jwt.verify(refreshToken, "secret") as { id: string };
+  const payload = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
   if (!payload.id) sendErrorRes(res, "Unauthorized request", 401)
     const user = await UserModel.findOne({
       _id: payload.id,
@@ -79,10 +83,10 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
       await UserModel.findByIdAndUpdate(payload.id, { tokens: [] });
       return sendErrorRes(res, "Unauthorized request", 401);
     }
-    const newAccessToken = jwt.sign({id:user._id}, "secret", {
+    const newAccessToken = jwt.sign({id:user._id}, JWT_SECRET, {
       expiresIn: "15m",
     });
-    const newRefreshToken = jwt.sign({id:user._id}, "secret");
+    const newRefreshToken = jwt.sign({id:user._id}, JWT_SECRET);
 
     user.tokens = user.tokens.filter((t) => t!== refreshToken)
     user.tokens.push(newRefreshToken)
@@ -103,10 +107,10 @@ export const login: RequestHandler = async (req, res) => {
   if (!isMacthed) return sendErrorRes(res, "InvalidPassword", 422);
 
   const payload = { id: user._id };
-  const accessToken = jwt.sign(payload, "secret", {
+  const accessToken = jwt.sign(payload, JWT_SECRET, {
     expiresIn: "15m",
   });
-  const refreshToken = jwt.sign(payload, "secret");
+  const refreshToken = jwt.sign(payload, JWT_SECRET);
   if (!user.tokens) {
     user.tokens = [refreshToken];
   } else {
