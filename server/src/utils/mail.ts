@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer"
+import dotenv from "dotenv"
+dotenv.config()
 
 const {MAIL_TRAP_USER, MAIL_TRAP_PASSWORD} = process.env
 
@@ -19,8 +21,17 @@ const sendVerification = async (email: string, link: string) => {
   });
 };
 
+const sendPassResetLink = async (email: string, link: string) => {
+  await transport.sendMail({
+    from: "security@myapp.com",
+    to: email,
+    html: `<h1>Please click on <a href=${link}>this link</a> to update your password<h1>`,
+  });
+};
+
 const mail = {
   sendVerification,
+  sendPassResetLink
 };
 
 export default mail;
