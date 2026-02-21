@@ -19,7 +19,7 @@ export const sign_up: RequestHandler = async (req, res) => {
     const newUser = await UserModel.create({ name, email, password });
     const token = crypto.randomBytes(36).toString("hex");
     await AuthVerificationTokenModel.create({ owner: newUser._id, token });
-    const link = `http://localhost:3000/verify?id${newUser._id}&token=${token}`;
+    const link = `http://localhost:3000/verify.html?id=${newUser._id}&token=${token}`;
 
     // Looking to send emails in production? Check out our Email API/SMTP product
     const transport = nodemailer.createTransport({
