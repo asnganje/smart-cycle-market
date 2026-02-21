@@ -157,3 +157,7 @@ export const generateForgetPassLink: RequestHandler = async (req, res) => {
   await mail.sendPassResetLink(user.email, passResetLink)
   res.json({message:"Please check your email!"})
 }
+
+export const grantValid: RequestHandler = async (req, res) => {
+  res.json({valid:true})
+}
