@@ -123,6 +123,18 @@ export const login: RequestHandler = async (req, res) => {
   });
 };
 
+
 export const sendProfile: RequestHandler = async (req, res) => {
   res.json({ profile: req.user });
 };
+
+export const signOut: RequestHandler = async (req, res) => {
+  const {refreshToken} = req.body
+  const user = await UserModel.findOne({_id: req.user.id, tokens:refreshToken})
+  if(!user) return sendErrorRes(res, "Unauthorized request, user not found!", 403)
+  
+  const newTokens = user.tokens.filter((t)=>t!== refreshToken)
+  user.tokens = newTokens
+  await user.save()
+  res.send()
+}
