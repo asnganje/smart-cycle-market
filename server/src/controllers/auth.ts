@@ -2,16 +2,16 @@ import { RequestHandler } from "express";
 import AuthVerificationTokenModel from "src/models/AuthVerificationToken";
 import UserModel from "src/models/User";
 import crypto from "crypto";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import { sendErrorRes } from "src/utils/helper";
 import jwt from "jsonwebtoken";
 import mail from "src/utils/mail";
 import PassResetTokenModel from "src/models/PasswordResetToken";
-dotenv.config()
+dotenv.config();
 
-const VERIFICATION_LINK = process.env.VERIFICATION_LINK
-const JWT_SECRET = process.env.JWT_SECRET!
-const PASSWORD_RESET_LINK=process.env.PASSWORD_RESET_LINK
+const VERIFICATION_LINK = process.env.VERIFICATION_LINK;
+const JWT_SECRET = process.env.JWT_SECRET!;
+const PASSWORD_RESET_LINK = process.env.PASSWORD_RESET_LINK;
 
 export const sign_up: RequestHandler = async (req, res) => {
   const { name, email, password } = req.body;
@@ -76,30 +76,29 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
 
   if (!refreshToken) sendErrorRes(res, "Unauthorized request", 403);
   const payload = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
-  if (!payload.id) sendErrorRes(res, "Unauthorized request", 401)
-    const user = await UserModel.findOne({
-      _id: payload.id,
-      tokens: refreshToken,
-    });
-    if (!user) {
-      await UserModel.findByIdAndUpdate(payload.id, { tokens: [] });
-      return sendErrorRes(res, "Unauthorized request", 401);
-    }
-    const newAccessToken = jwt.sign({id:user._id}, JWT_SECRET, {
-      expiresIn: "15m",
-    });
-    const newRefreshToken = jwt.sign({id:user._id}, JWT_SECRET);
+  if (!payload.id) sendErrorRes(res, "Unauthorized request", 401);
+  const user = await UserModel.findOne({
+    _id: payload.id,
+    tokens: refreshToken,
+  });
+  if (!user) {
+    await UserModel.findByIdAndUpdate(payload.id, { tokens: [] });
+    return sendErrorRes(res, "Unauthorized request", 401);
+  }
+  const newAccessToken = jwt.sign({ id: user._id }, JWT_SECRET, {
+    expiresIn: "15m",
+  });
+  const newRefreshToken = jwt.sign({ id: user._id }, JWT_SECRET);
 
-    user.tokens = user.tokens.filter((t) => t!== refreshToken)
-    user.tokens.push(newRefreshToken)
-    await user.save()
-    res.json({
-      tokens:{
-        refresh: newRefreshToken,
-        access: newAccessToken
-      }
-    })
-
+  user.tokens = user.tokens.filter((t) => t !== refreshToken);
+  user.tokens.push(newRefreshToken);
+  await user.save();
+  res.json({
+    tokens: {
+      refresh: newRefreshToken,
+      access: newAccessToken,
+    },
+  });
 };
 export const login: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
@@ -129,35 +128,52 @@ export const login: RequestHandler = async (req, res) => {
   });
 };
 
-
 export const sendProfile: RequestHandler = async (req, res) => {
   res.json({ profile: req.user });
 };
 
 export const signOut: RequestHandler = async (req, res) => {
-  const {refreshToken} = req.body
-  const user = await UserModel.findOne({_id: req.user.id, tokens:refreshToken})
-  if(!user) return sendErrorRes(res, "Unauthorized request, user not found!", 403)
-  
-  const newTokens = user.tokens.filter((t)=>t!== refreshToken)
-  user.tokens = newTokens
-  await user.save()
-  res.send()
-}
+  const { refreshToken } = req.body;
+  const user = await UserModel.findOne({
+    _id: req.user.id,
+    tokens: refreshToken,
+  });
+  if (!user)
+    return sendErrorRes(res, "Unauthorized request, user not found!", 403);
+
+  const newTokens = user.tokens.filter((t) => t !== refreshToken);
+  user.tokens = newTokens;
+  await user.save();
+  res.send();
+};
 
 export const generateForgetPassLink: RequestHandler = async (req, res) => {
-  const {email} = req.body
+  const { email } = req.body;
 
-  const user = await UserModel.findOne({email})
-  if(!user) return sendErrorRes(res, "Unauthorized User", 404)
-  await PassResetTokenModel.findOneAndDelete({owner:user._id})
+  const user = await UserModel.findOne({ email });
+  if (!user) return sendErrorRes(res, "Unauthorized User", 404);
+  await PassResetTokenModel.findOneAndDelete({ owner: user._id });
   const token = crypto.randomBytes(36).toString("hex");
-  await PassResetTokenModel.create({owner: user._id, token})
-  const passResetLink = `${PASSWORD_RESET_LINK}?id=${user._id}&token=${token}`
-  await mail.sendPassResetLink(user.email, passResetLink)
-  res.json({message:"Please check your email!"})
-}
+  await PassResetTokenModel.create({ owner: user._id, token });
+  const passResetLink = `${PASSWORD_RESET_LINK}?id=${user._id}&token=${token}`;
+  await mail.sendPassResetLink(user.email, passResetLink);
+  res.json({ message: "Please check your email!" });
+};
 
 export const grantValid: RequestHandler = async (req, res) => {
-  res.json({valid:true})
-}
+  res.json({ valid: true });
+};
+
+export const updatePassword: RequestHandler = async (req, res) => {
+  const { id, password } = req.body;
+  const user = await UserModel.findById(id);
+  if (!user) return sendErrorRes(res, "Unauthorized request", 403);
+  const matched = await user.comparePassword(password);
+  if (matched)
+    return sendErrorRes(res, "The new password must be different!", 422);
+  user.password = password
+  await user.save()
+  await PassResetTokenModel.findOneAndDelete({owner:user._id})
+  await mail.sendPasswordUpdateMessage(user.email)
+  res.json({message:"Password reset successfully!"})
+};
