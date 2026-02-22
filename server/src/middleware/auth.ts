@@ -4,6 +4,7 @@ import PassResetTokenModel from "src/models/PasswordResetToken";
 import UserModel from "src/models/User";
 import { sendErrorRes } from "src/utils/helper";
 
+const JWT_SECRET=process.env.JWT_SECRET!
 interface UserProfile {
   id: string;
   name: string;
@@ -25,7 +26,7 @@ export const isAuth: RequestHandler = async (req, res, next) => {
 
     if (!authToken) return sendErrorRes(res, "Unauthorized request!", 403);
     const token = authToken.split("Bearer ")[1];
-    const decoded = jwt.verify(token, "secret") as { id: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
 
     const user = await UserModel.findById(decoded.id);
 

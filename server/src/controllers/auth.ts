@@ -171,9 +171,18 @@ export const updatePassword: RequestHandler = async (req, res) => {
   const matched = await user.comparePassword(password);
   if (matched)
     return sendErrorRes(res, "The new password must be different!", 422);
-  user.password = password
-  await user.save()
-  await PassResetTokenModel.findOneAndDelete({owner:user._id})
-  await mail.sendPasswordUpdateMessage(user.email)
-  res.json({message:"Password reset successfully!"})
+  user.password = password;
+  await user.save();
+  await PassResetTokenModel.findOneAndDelete({ owner: user._id });
+  await mail.sendPasswordUpdateMessage(user.email);
+  res.json({ message: "Password reset successfully!" });
+};
+
+export const updateProfile: RequestHandler = async (req, res) => {
+  const { name } = req.body;
+
+  if (typeof name !== "string" || name.trim().length < 3)
+    return sendErrorRes(res, "Invalid name", 422);
+  await UserModel.findByIdAndUpdate(req.user.id, { name });
+  res.json({ profile: { ...req.user, name } });
 };
