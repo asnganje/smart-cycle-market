@@ -8,11 +8,13 @@ import {
   sendProfile,
   sign_up,
   signOut,
+  updateAvatar,
   updatePassword,
   updateProfile,
   verifyEmail,
 } from "src/controllers/auth";
 import { isAuth, isValidPassResetToken } from "src/middleware/auth";
+import fileParser from "src/middleware/fileParser";
 import validate from "src/middleware/validator";
 import {
   NewUserSchema,
@@ -36,8 +38,7 @@ authRouter
 authRouter
   .route("/reset-pass")
   .post(validate(ResetPasswordSchema), isValidPassResetToken, updatePassword);
-authRouter
-  .route("/update-profile")
-  .patch(isAuth, updateProfile);
+authRouter.route("/update-profile").patch(isAuth, updateProfile);
+authRouter.route("/update-avatar").patch(isAuth, fileParser, updateAvatar);
 
 export default authRouter;

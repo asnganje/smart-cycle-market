@@ -7,6 +7,7 @@ interface UserDocument extends Document {
   password:string,
   verified: boolean,
   tokens: string[],
+  avatar?:{url:string, id:string}
   comparePassword(password: string): Promise<boolean>
 }
 
@@ -28,6 +29,11 @@ const UserSchema = new Schema<UserDocument>(
     password: {
       type: String,
       required: true,
+    },
+    avatar:{
+      type: Object,
+      url: String,
+      id: String
     },
    tokens: [String]
   },
