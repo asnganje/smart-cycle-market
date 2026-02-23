@@ -6,6 +6,7 @@ import {
   grantValid,
   login,
   sendProfile,
+  sendPublicProfile,
   sign_up,
   signOut,
   updateAvatar,
@@ -40,5 +41,6 @@ authRouter
   .post(validate(ResetPasswordSchema), isValidPassResetToken, updatePassword);
 authRouter.route("/update-profile").patch(isAuth, updateProfile);
 authRouter.route("/update-avatar").patch(isAuth, fileParser, updateAvatar);
+authRouter.route("/profile/:id").get(isAuth, sendPublicProfile);
 
 export default authRouter;

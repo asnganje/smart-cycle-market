@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import mail from "src/utils/mail";
 import PassResetTokenModel from "src/models/PasswordResetToken";
 import { v2 as cloudinary } from "cloudinary";
+import { isValidObjectId } from "mongoose";
 dotenv.config();
 
 const VERIFICATION_LINK = process.env.VERIFICATION_LINK;
@@ -230,3 +231,24 @@ export const updateAvatar: RequestHandler = async (req, res) => {
   await user.save();
   res.json({ profile: { ...req.user, avatar: user.avatar.url } });
 };
+
+export const sendPublicProfile: RequestHandler = async (req, res) => {
+  const profileId = req.params.id
+
+  if(!isValidObjectId(profileId)) {
+      return sendErrorRes(res, "Invalid profile id!", 422)
+  }
+
+  const user = await UserModel.findById(profileId)
+  if(!user) {
+    return sendErrorRes(res, "Profile not found!", 404)
+  }
+
+  res.json({
+    profile: {
+      id: user._id,
+      name: user.name,
+      avatar: user.avatar?.url
+    }
+  })
+}
