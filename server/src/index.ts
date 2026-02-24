@@ -4,6 +4,7 @@ import { connectDB } from "./db";
 import dotenv from "dotenv"
 import formidable from "formidable";
 import path from "node:path";
+import productRouter from "./routes/product";
 
 dotenv.config()
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.static("src/public"))
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
+app.use("/product", productRouter);
 
 app.post("/auth/upload-file", async (req,res)=> {
   const form = formidable({
