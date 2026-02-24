@@ -15,7 +15,7 @@ app.use(express.static("src/public"))
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
-app.use("/product", productRouter);
+app.use("/products", productRouter);
 
 app.post("/auth/upload-file", async (req,res)=> {
   const form = formidable({
