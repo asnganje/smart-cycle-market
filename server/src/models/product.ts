@@ -39,6 +39,10 @@ const ProductSchema = new Schema<ProductDocument>({
     enum:[...categories],
     required:true
   },
+  purchaseDate:{
+    type:Date,
+    required:true,
+  },
   images: [{
     type:Object,
     url: String,
