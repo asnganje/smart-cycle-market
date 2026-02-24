@@ -70,7 +70,8 @@ export const listNewProduct: RequestHandler = async (req, res) => {
 };
 
 export const updateProduct: RequestHandler = async (req, res) => {
-  const { purchaseDate, name, description, category, price, thumbnail } = req.body;
+  const { purchaseDate, name, description, category, price, thumbnail } =
+    req.body;
   const { id: productId } = req.params;
   if (!isValidObjectId(productId))
     return sendErrorRes(res, "Invalid project id!", 422);
@@ -92,50 +93,65 @@ export const updateProduct: RequestHandler = async (req, res) => {
 
   if (!product) return sendErrorRes(res, "Product not found!", 404);
 
-  if(typeof product.thumbnail === "string") product.thumbnail = thumbnail
+  if (typeof product.thumbnail === "string") product.thumbnail = thumbnail;
 
   const { images } = req.files;
-  
-  if (Array.isArray(images) && ((product.images.length + images.length) > 5))
+
+  if (Array.isArray(images) && product.images.length + images.length > 5)
     return sendErrorRes(res, "Image files cannot be more than 5", 422);
 
   let invalidFileType = false;
-  if (Array.isArray(images)) { 
-    for(let img of images) {
-      if(!img.mimetype?.startsWith("image")){
+  if (Array.isArray(images)) {
+    for (let img of images) {
+      if (!img.mimetype?.startsWith("image")) {
         invalidFileType = true;
         break;
       }
     }
   } else {
-    if(images) {
-      if(!images.mimetype?.startsWith("image")) {
-        invalidFileType = true
+    if (images) {
+      if (!images.mimetype?.startsWith("image")) {
+        invalidFileType = true;
       }
     }
   }
 
   if (invalidFileType) {
-    return sendErrorRes(res, "Invalid file type, files must be image type", 422)    
+    return sendErrorRes(
+      res,
+      "Invalid file type, files must be image type",
+      422,
+    );
   }
 
-  if(Array.isArray(images)) {
-    const uploadPromise = images.map((file)=>uploadImage(file.filepath))
+  if (Array.isArray(images)) {
+    const uploadPromise = images.map((file) => uploadImage(file.filepath));
 
-    const uploadResults = await Promise.all(uploadPromise)
+    const uploadResults = await Promise.all(uploadPromise);
 
-    const newImages = uploadResults.map(({secure_url, public_id})=> {
-      return {url: secure_url, id: public_id}
-    })
-    product.images.push(...newImages)
-    product.thumbnail = product.images[0].url
+    const newImages = uploadResults.map(({ secure_url, public_id }) => {
+      return { url: secure_url, id: public_id };
+    });
+    product.images.push(...newImages);
+    product.thumbnail = product.images[0].url;
   } else {
-    if(images) {
-      const {secure_url, public_id} = await uploadImage(images.filepath)
-      product.images.push({url: secure_url, id: public_id})
+    if (images) {
+      const { secure_url, public_id } = await uploadImage(images.filepath);
+      product.images.push({ url: secure_url, id: public_id });
     }
   }
 
-  await product.save()
-  res.json({message: "Product updated successfully"})
+  await product.save();
+  res.json({ message: "Product updated successfully" });
+};
+
+export const deleteProduct: RequestHandler = async (req, res) => {
+  const { id: productId } = req.params;
+  if (!isValidObjectId(productId)) return sendErrorRes(res, "Invalid product id", 422);
+  try {
+    await ProductModel.findByIdAndDelete({_id: productId, owner:req.user.id})
+    res.json({message: "Product successfully deleted"})
+  } catch (error) {
+    res.json({message: "Could not delete product!"})
+  }
 };
