@@ -69,3 +69,23 @@ export const newProductSchema = yup.object({
     })
     .required("Purchase date is required!"),
 });
+
+export const updateProductSchema = yup.object({
+  name: yup.string(),
+  description: yup.string(),
+  category: yup
+    .string()
+    .oneOf(categories, "Invalid category!"),
+  price: yup
+    .string()
+    .transform((value) => (isNaN(+value) ? undefined : +value)),
+  purchaseDate: yup
+    .string()
+    .transform((value) => {
+      try {
+        return parseISO(value);
+      } catch (error) {
+        return undefined;
+      }
+    }),
+});
