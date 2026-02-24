@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import ProductModel from "src/models/product";
 import { sendErrorRes } from "src/utils/helper";
-import cloudUploader from "./cloud";
+import cloudUploader, { cloudApi } from "./cloud";
 import { UploadApiResponse } from "cloudinary";
 import { isValidObjectId } from "mongoose";
 
@@ -148,10 +148,13 @@ export const updateProduct: RequestHandler = async (req, res) => {
 export const deleteProduct: RequestHandler = async (req, res) => {
   const { id: productId } = req.params;
   if (!isValidObjectId(productId)) return sendErrorRes(res, "Invalid product id", 422);
-  try {
-    await ProductModel.findByIdAndDelete({_id: productId, owner:req.user.id})
-    res.json({message: "Product successfully deleted"})
-  } catch (error) {
-    res.json({message: "Could not delete product!"})
+  const product = await ProductModel.findByIdAndDelete({_id: productId, owner:req.user.id})
+  if(!product) return sendErrorRes(res, "Product not found!", 404)
+  const images = product.images
+  if(images.length) {
+    const ids = images.map(({id}) => id)
+    await cloudApi.delete_resources(ids)
   }
+
+  res.json({message:"Product removed successfully!"})
 };
