@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteProduct, deleteProductImage, listNewProduct, updateProduct } from "src/controllers/product";
+import { deleteProduct, deleteProductImage, getProductDetail, listNewProduct, updateProduct } from "src/controllers/product";
 import { isAuth } from "src/middleware/auth";
 import fileParser from "src/middleware/fileParser";
 import validate from "src/middleware/validator";
@@ -22,4 +22,6 @@ productRouter
 productRouter
   .route("/image/:productId/:imageId")
   .delete(isAuth, deleteProductImage)
+productRouter
+  .route("/:id").get(isAuth, getProductDetail)
 export default productRouter;
