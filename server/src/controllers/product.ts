@@ -147,14 +147,51 @@ export const updateProduct: RequestHandler = async (req, res) => {
 
 export const deleteProduct: RequestHandler = async (req, res) => {
   const { id: productId } = req.params;
-  if (!isValidObjectId(productId)) return sendErrorRes(res, "Invalid product id", 422);
-  const product = await ProductModel.findByIdAndDelete({_id: productId, owner:req.user.id})
-  if(!product) return sendErrorRes(res, "Product not found!", 404)
-  const images = product.images
-  if(images.length) {
-    const ids = images.map(({id}) => id)
-    await cloudApi.delete_resources(ids)
+  if (!isValidObjectId(productId))
+    return sendErrorRes(res, "Invalid product id", 422);
+  const product = await ProductModel.findByIdAndDelete({
+    _id: productId,
+    owner: req.user.id,
+  });
+  if (!product) return sendErrorRes(res, "Product not found!", 404);
+  const images = product.images;
+  if (images.length) {
+    const ids = images.map(({ id }) => id);
+    await cloudApi.delete_resources(ids);
   }
 
-  res.json({message:"Product removed successfully!"})
+  res.json({ message: "Product removed successfully!" });
+};
+
+export const deleteProductImage: RequestHandler = async (req, res) => {
+  const { productId, imageId } = req.params;
+  console.log(productId);
+  
+
+  if (!isValidObjectId(productId))
+    return sendErrorRes(res, "Invalid product ID", 422);
+
+  const product = await ProductModel.findOneAndUpdate(
+    { _id: productId, owner: req.user.id } as any,
+    {
+      $pull: {
+        images: { id: imageId },
+      },
+    },
+    { new: true },
+  );
+
+  if(!product) sendErrorRes(res, "No product found!", 404)
+  if(product?.thumbnail.includes(imageId as string)){
+    if(product.images.length > 0){
+      product.thumbnail = product?.images[0].url
+    } else {
+      product.thumbnail = ""
+    }
+    await product.save()
+  }
+
+  await cloudUploader.destroy(imageId as string)
+
+  res.json({message: "Image removed successfully!"})
 };

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteProduct, listNewProduct, updateProduct } from "src/controllers/product";
+import { deleteProduct, deleteProductImage, listNewProduct, updateProduct } from "src/controllers/product";
 import { isAuth } from "src/middleware/auth";
 import fileParser from "src/middleware/fileParser";
 import validate from "src/middleware/validator";
@@ -14,9 +14,12 @@ productRouter
   .route("/list")
   .post(isAuth, fileParser, validate(newProductSchema), listNewProduct);
 productRouter
-  .route("/list/:id")
+  .route("/:id")
   .patch(isAuth, fileParser, validate(updateProductSchema), updateProduct);
 productRouter
-  .route("/list/:id")
+  .route("/:id")
   .delete(isAuth, deleteProduct)
+productRouter
+  .route("/image/:productId/:imageId")
+  .delete(isAuth, deleteProductImage)
 export default productRouter;
