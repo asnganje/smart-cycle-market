@@ -247,3 +247,53 @@ export const getProductByCategory: RequestHandler = async (req, res) => {
 
   res.json({ products: listings });
 };
+
+export const getLatestProducts: RequestHandler = async (req, res) => {
+  const page = +(req.query?.page as string) || 1;
+  const limit = +(req.query?.limit as string) || 4;
+  const skip = (page - 1) * limit;
+
+  const products = await ProductModel.find({})
+    .sort("-createdAt")
+    .skip(skip)
+    .limit(limit);
+  const listings = products.map((p)=> {
+    return {
+      id:p._id,       
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      thumbnail: p.thumbnail,
+    }
+  })
+  res.json({products: listings})
+};
+
+export const getListings: RequestHandler = async (req, res) => {
+  const page = +(req.query?.page as string) || 1;
+  const limit = +(req.query?.limit as string) || 4;
+  const skip = (page - 1) * limit;
+
+  const products = await ProductModel.find({owner: req.user.id} as any)
+    .sort("-createdAt")
+    .skip(skip)
+    .limit(limit);
+  const listings = products.map((p)=> {
+    return {
+      id:p._id,       
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      thumbnail: p.thumbnail,
+      images:p.images?.map(({url})=>url),
+      description: p.description,
+      date: p.purchaseDate,
+      seller: {
+        id: req.user.id,
+        name: req.user.name,
+        avatar: req.user.avatar?.url
+      }
+    }
+  })
+  res.json({products: listings})
+};
