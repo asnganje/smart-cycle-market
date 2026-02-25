@@ -5,6 +5,7 @@ import cloudUploader, { cloudApi } from "./cloud";
 import { UploadApiResponse } from "cloudinary";
 import { isValidObjectId } from "mongoose";
 import { UserDocument } from "src/models/User";
+import categories from "src/utils/categories";
 
 const uploadImage = (filepath: string): Promise<UploadApiResponse> => {
   return cloudUploader.upload(filepath, {
@@ -165,7 +166,7 @@ export const deleteProduct: RequestHandler = async (req, res) => {
 };
 
 export const deleteProductImage: RequestHandler = async (req, res) => {
-  const { productId, imageId } = req.params;  
+  const { productId, imageId } = req.params;
 
   if (!isValidObjectId(productId))
     return sendErrorRes(res, "Invalid product ID", 422);
@@ -180,37 +181,69 @@ export const deleteProductImage: RequestHandler = async (req, res) => {
     { new: true },
   );
 
-  if(!product) sendErrorRes(res, "No product found!", 404)
-  if(product?.thumbnail.includes(imageId as string)){
-    if(product.images.length > 0){
-      product.thumbnail = product?.images[0].url
+  if (!product) sendErrorRes(res, "No product found!", 404);
+  if (product?.thumbnail.includes(imageId as string)) {
+    if (product.images.length > 0) {
+      product.thumbnail = product?.images[0].url;
     } else {
-      product.thumbnail = ""
+      product.thumbnail = "";
     }
-    await product.save()
+    await product.save();
   }
 
-  await cloudUploader.destroy(imageId as string)
+  await cloudUploader.destroy(imageId as string);
 
-  res.json({message: "Image removed successfully!"})
+  res.json({ message: "Image removed successfully!" });
 };
 
 export const getProductDetail: RequestHandler = async (req, res) => {
-  const {id} = req.params
-  if(!id) return sendErrorRes(res, "Invalid product ID", 422)
-  const product = await ProductModel.findOne({_id: id}).populate<{owner: UserDocument}>("owner")
-  if(!product) return sendErrorRes(res, "Product not found", 404)
-  res.json({product:{
-id: product._id,
-name:product.name,
-category:product.category,
-price: product.price,
-date: product.purchaseDate,
-images: product.images?.map(({url})=>url),
-seller: {
-  id: product.owner._id,
-  name:product.owner.name,
-  avatar:product.owner.avatar?.url 
-}}})
-}
+  const { id } = req.params;
+  if (!id) return sendErrorRes(res, "Invalid product ID", 422);
+  const product = await ProductModel.findOne({ _id: id }).populate<{
+    owner: UserDocument;
+  }>("owner");
+  if (!product) return sendErrorRes(res, "Product not found", 404);
+  res.json({
+    product: {
+      id: product._id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      date: product.purchaseDate,
+      images: product.images?.map(({ url }) => url),
+      seller: {
+        id: product.owner._id,
+        name: product.owner.name,
+        avatar: product.owner.avatar?.url,
+      },
+    },
+  });
+};
 
+export const getProductByCategory: RequestHandler = async (req, res) => {
+  const { category } = req.params;
+  const page = +(req.query?.page as string) || 1;
+  const limit = +(req.query?.limit as string) || 4;
+  const skip = (page - 1) * limit;
+
+  if (!categories.includes(category as string))
+    return sendErrorRes(res, "Invalid product category!", 422);
+  const products = await ProductModel.find({ category })
+    .sort("-createdAt")
+    .skip(skip)
+    .limit(limit);
+
+  if (!products) return sendErrorRes(res, "Product not found!", 422);
+
+  const listings = products.map((p) => {
+    return {
+      id: p._id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      thumbnail: p.thumbnail,
+    };
+  });
+
+  res.json({ products: listings });
+};
