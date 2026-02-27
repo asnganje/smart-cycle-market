@@ -9,11 +9,12 @@ import FormInput from "../ui/FormInput";
 import AppButton from "../ui/AppButton";
 import FormDivider from "../ui/FormDivider";
 import FormNavigator from "../ui/FormNavigator";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
+import { AuthStackParamList } from "./navigator/auth/AuthNavigator";
 
 const SignIn = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
   const navigationHandler = (destination: string) => {
     if(destination === "signUp") {
