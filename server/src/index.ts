@@ -43,7 +43,7 @@ const start = async(dbUri: string | undefined) : Promise<void> => {
       throw new Error("MongoDB URI is missing!")
     }
     await connectDB(dbUri)
-    app.listen(port, () => {
+    app.listen(port, "0.0.0.0", () => {
     console.log(`Server is listening on port ${port}`);
 });
   } catch (error) {

@@ -5,15 +5,18 @@ import { Colors } from '../utils/colors'
 
 interface IAppButtonProps {
   style?: ViewStyle,
+  children: ReactNode,
+  isLoading?:boolean,
   title:string,
   textStyle?:TextStyle,
   onPress?:()=>void
 }
 
-const AppButton: FC<IAppButtonProps> = ({title, style, textStyle, onPress}) => {
+const AppButton: FC<IAppButtonProps> = ({title, style, isLoading, textStyle, children, onPress}) => {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.btnContainer, style]}>
-      <Text style={[styles.btnText, textStyle]}>{title}</Text>
+      {!isLoading && <Text style={[styles.btnText, textStyle]}>{title}</Text>}
+      {children}
     </TouchableOpacity>
   )
 }

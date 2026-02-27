@@ -9,8 +9,13 @@ import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AuthStackParamList } from "./navigator/auth/AuthNavigator";
 import { useState } from "react";
+import axios from "axios";
+import LoadingSpinner from "../ui/LoadingSpinner";
+import { NewUserSchema, yupValidator } from "../utils/validator";
+import { runAxiosAsync } from "../api/runAxiosAsync";
 
 const SignUp = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -20,9 +25,15 @@ const SignUp = () => {
   const changeHandler = (key: string) => (text: string) =>
     setUserInfo({ ...userInfo, [key]: text });
 
-  const submitHandler = () => {
-    console.log(name, email, password)
-  }
+  const submitHandler = async () => {
+    setIsLoading(true);
+    const { values, error } = await yupValidator(NewUserSchema, userInfo);
+    const res = await runAxiosAsync<{ message: string }>(
+      axios.post("http://10.56.22.118:3000/auth/sign-up", values),
+    );
+    console.log(res);
+    setIsLoading(false);
+  };
 
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
@@ -62,7 +73,13 @@ const SignUp = () => {
               value={password}
               onChangeText={changeHandler("password")}
             />
-            <AppButton title={"Sign Up"} onPress={submitHandler}/>
+            <AppButton
+              isLoading={isLoading}
+              title={"Sign Up"}
+              onPress={submitHandler}
+            >
+              {isLoading && <LoadingSpinner />}
+            </AppButton>
             <FormDivider style={styles.formDivider} />
             <FormNavigator
               onPress={navigationHandler}
