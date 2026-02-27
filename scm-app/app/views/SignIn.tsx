@@ -5,6 +5,7 @@ import { s, vs } from "react-native-size-matters";
 import { Colors } from "../utils/colors";
 import FormInput from "../ui/FormInput";
 import AppButton from "../ui/AppButton";
+import FormDivider from "../ui/FormDivider";
 
 interface ISignInProps {
   name: string;
@@ -30,6 +31,7 @@ const SignIn: FC<ISignInProps> = ({ name }) => {
           secureTextEntry
         />
         <AppButton>Sign in</AppButton>
+        <FormDivider style={styles.formDivider}/>
       </View>
     </View>
   );
@@ -42,4 +44,7 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: vs(30),
   },
+  formDivider:{
+    width:"50%"
+  }
 });
