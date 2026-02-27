@@ -17,20 +17,19 @@ import FormNavigator from "../ui/FormNavigator";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import { useNavigation } from "@react-navigation/native";
 
-
-const SignUp = () => {
-  const navigation = useNavigation()
-
-  const navigationHandler = (destination: string) => {
-    if(destination === "forgotPass") {
-      navigation.navigate("forgotPass")
-    } else if(destination === "signIn") {
-      navigation.navigate("signIn")
+const ForgotPass = () => {
+    const navigation = useNavigation();
+  
+    const navigationHandler = (destination: string) => {
+      if(destination === "signUp") {
+        navigation.navigate("signUp")
+      } else if(destination === "signIn") {
+        navigation.navigate("signIn")
+      }
     }
-  }
   return (
     <KeyBoardAvoider>
-            <ScrollView>
+      <ScrollView>
         <View style={styles.innerContainer}>
           <WelcomeHeader
             heading={"Online market place for used goods!"}
@@ -40,29 +39,21 @@ const SignUp = () => {
           />
           <View style={styles.formContainer}>
             <FormInput
-              placeholder="Name"
-            />
-            <FormInput
               placeholder="Email"
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            <FormInput placeholder="Password" secureTextEntry />
-            <AppButton title={"Sign Up"}/>
+            <AppButton title={"Request link"} />
             <FormDivider style={styles.formDivider} />
-            <FormNavigator onPress={navigationHandler} destination1="forgotPass" destination2="signIn" title1="Forgot Password" title2="Sign In"/>
+            <FormNavigator onPress={navigationHandler} destination1="signUp" destination2="signIn" title1="Sign Up" title2="Sign In"/>
           </View>
         </View>
       </ScrollView>
     </KeyBoardAvoider>
-
   );
 };
-export default SignUp;
+export default ForgotPass;
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   innerContainer: {
     flex: 1,
     padding: s(15),

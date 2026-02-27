@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   img: {
-    height: s(250),
+    height: s(200),
     width: s(250),
   },
   heading:{

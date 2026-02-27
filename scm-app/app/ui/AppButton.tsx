@@ -1,17 +1,19 @@
 import { FC, ReactNode } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 import { s } from 'react-native-size-matters'
 import { Colors } from '../utils/colors'
 
 interface IAppButtonProps {
-  children: ReactNode,
-  style?: ViewStyle
+  style?: ViewStyle,
+  title:string,
+  textStyle?:TextStyle,
+  onPress?:()=>void
 }
 
-const AppButton: FC<IAppButtonProps> = ({children}) => {
+const AppButton: FC<IAppButtonProps> = ({title, style, textStyle, onPress}) => {
   return (
-    <TouchableOpacity style={styles.btnContainer}>
-      <Text style={styles.btnText}>{children}</Text>
+    <TouchableOpacity onPress={onPress} style={[styles.btnContainer, style]}>
+      <Text style={[styles.btnText, textStyle]}>{title}</Text>
     </TouchableOpacity>
   )
 }
