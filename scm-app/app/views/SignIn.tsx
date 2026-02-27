@@ -4,6 +4,7 @@ import WelcomeHeader from "../ui/WelcomeHeader";
 import { s, vs } from "react-native-size-matters";
 import { Colors } from "../utils/colors";
 import FormInput from "../ui/FormInput";
+import AppButton from "../ui/AppButton";
 
 interface ISignInProps {
   name: string;
@@ -28,6 +29,7 @@ const SignIn: FC<ISignInProps> = ({ name }) => {
           placeholder="Password"
           secureTextEntry
         />
+        <AppButton>Sign in</AppButton>
       </View>
     </View>
   );

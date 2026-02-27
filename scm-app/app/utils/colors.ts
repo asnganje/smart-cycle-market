@@ -1,4 +1,5 @@
 export const Colors = {
   primary:"#1C1C1F",
-  deActive:"#DCE4F2"
+  deActive:"#DCE4F2",
+  white:"#fff"
 }
