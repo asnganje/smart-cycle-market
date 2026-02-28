@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import client from "../../api/client";
 import * as SecureStore from "expo-secure-store";
 import { runAxiosAsync } from "../../api/runAxiosAsync";
+import LoadingSpinnerAnimate from "../../ui/LoadingSpinnerAnimate";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -19,19 +20,24 @@ const MyTheme = {
 
 const Navigator = () => {
   const { pending, profile } = useSelector(getAuthState);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const isLoggedIn = profile ? true : false;
 
   const fetchProfile = async () => {
     const accessToken = await SecureStore.getItemAsync("access-token");
     if (accessToken) {
-    const res = await runAxiosAsync<{profile: Profile}>(client.get("/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }));
-      if(res) {
-        dispatch(updateAuthState({pending:false, profile: res.profile}))
+      dispatch(updateAuthState({ pending: true, profile: null }));
+      const res = await runAxiosAsync<{ profile: Profile }>(
+        client.get("/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+      );
+      if (res) {
+        dispatch(updateAuthState({ pending: false, profile: res.profile }));
+      } else {
+        dispatch(updateAuthState({pending:false, profile:null}))
       }
     }
   };
@@ -41,6 +47,7 @@ const Navigator = () => {
   }, []);
   return (
     <NavigationContainer theme={MyTheme}>
+      <LoadingSpinnerAnimate visible={pending} />
       {!isLoggedIn ? <AuthNavigator /> : <AppNavigator />}
     </NavigationContainer>
   );
