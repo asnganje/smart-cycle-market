@@ -14,6 +14,9 @@ import { signInSchema, yupValidator } from "../utils/validator";
 import { showMessage } from "react-native-flash-message";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import client from "../api/client";
+import { useDispatch } from "react-redux";
+import { updateAuthState } from "../store/auth";
+import * as SecureStore from "expo-secure-store"
 
 
 export interface SignInRes {
@@ -30,6 +33,7 @@ export interface SignInRes {
 
 const SignIn = () => {
   const [busy, setBusy] = useState(false);
+  const dispatch = useDispatch()
   const [userInfo, setUserInfo] = useState({
     email: "",
     password: "",
@@ -53,7 +57,9 @@ const SignIn = () => {
       client.post("/auth/login", values),
     );
     if (res) {
-      console.log(res);      
+      await SecureStore.setItemAsync("access-token", res.profile.tokens.access)
+      await SecureStore.setItemAsync("refresh-token", res.profile.tokens.refresh)
+      dispatch(updateAuthState({profile:res.profile, pending:false}))     
       showMessage({
         message: "Login successful",
         type: "success",

@@ -29,21 +29,6 @@ export const sign_up: RequestHandler = async (req, res) => {
   const token = crypto.randomBytes(36).toString("hex");
   await AuthVerificationTokenModel.create({ owner: newUser._id, token });
   const link = `${VERIFICATION_LINK}?id=${newUser._id}&token=${token}`;
-
-  // Looking to send emails in production? Check out our Email API/SMTP product
-  // const transport = nodemailer.createTransport({
-  //   host: "sandbox.smtp.mailtrap.io",
-  //   port: 2525,
-  //   auth: {
-  //     user: "9e7fec9eabe457",
-  //     pass: "924670c6802ce4",
-  //   },
-  // });
-  // await transport.sendMail({
-  //   from: "verification@myapp.com",
-  //   to: newUser.email,
-  //   html: `<h1>Please click on <a href=${link}>this link</a> to verify your account<h1>`,
-  // });
   await mail.sendVerification(newUser.email, link);
   res.json({ message: "Please check your inbox" });
 };
