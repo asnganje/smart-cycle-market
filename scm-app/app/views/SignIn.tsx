@@ -1,8 +1,4 @@
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import WelcomeHeader from "../ui/WelcomeHeader";
 import { s, vs } from "react-native-size-matters";
 import FormInput from "../ui/FormInput";
@@ -12,17 +8,69 @@ import FormNavigator from "../ui/FormNavigator";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import { AuthStackParamList } from "./navigator/auth/AuthNavigator";
+import { useState } from "react";
+import LoadingSpinner from "../ui/LoadingSpinner";
+import { signInSchema, yupValidator } from "../utils/validator";
+import { showMessage } from "react-native-flash-message";
+import { runAxiosAsync } from "../api/runAxiosAsync";
+import axios from "axios";
+
+
+interface SignInRes {
+  profile: {
+        id: string,
+        email: string,
+        name: string,
+        tokens: {
+            refresh:string,
+            access: string
+        }
+    }
+}
 
 const SignIn = () => {
+  const [busy, setBusy] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    email: "",
+    password: "",
+  });
+  const { email, password } = userInfo;
+  const changeHandler = (key: string) => (text: string) =>
+    setUserInfo({ ...userInfo, [key]: text });
+
+  const submitHandler = async () => {
+    setBusy(true);
+    const { values, error } = await yupValidator(signInSchema, userInfo);
+    if (error) {
+      setBusy(false);
+      return showMessage({
+        message: error,
+        type: "danger",
+      });
+    }
+
+    const res = await runAxiosAsync<SignInRes>(
+      axios.post("http://10.56.22.118:3000/auth/login", values),
+    );
+    if (res) {
+      console.log(res);      
+      showMessage({
+        message: "Login successful",
+        type: "success",
+      });
+    }
+    setBusy(false);
+  };
+
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
   const navigationHandler = (destination: string) => {
-    if(destination === "signUp") {
-      navigation.navigate("signUp")
-    } else if(destination === "forgotPass") {
-      navigation.navigate("forgotPass")
+    if (destination === "signUp") {
+      navigation.navigate("signUp");
+    } else if (destination === "forgotPass") {
+      navigation.navigate("forgotPass");
     }
-  }
+  };
   return (
     <KeyBoardAvoider>
       <ScrollView>
@@ -37,12 +85,31 @@ const SignIn = () => {
             <FormInput
               placeholder="Email"
               keyboardType="email-address"
+              value={email}
+              onChangeText={changeHandler("email")}
               autoCapitalize="none"
             />
-            <FormInput placeholder="Password" secureTextEntry />
-            <AppButton title={"Sign In"} />
+            <FormInput
+              placeholder="Password"
+              value={password}
+              onChangeText={changeHandler("password")}
+              secureTextEntry
+            />
+            <AppButton
+              isLoading={busy}
+              onPress={submitHandler}
+              title={"Sign In"}
+            >
+              {busy && <LoadingSpinner />}
+            </AppButton>
             <FormDivider style={styles.formDivider} />
-            <FormNavigator onPress={navigationHandler} destination1="forgotPass" destination2="signUp" title1="Forgot Password" title2="Sign Up"/>
+            <FormNavigator
+              onPress={navigationHandler}
+              destination1="forgotPass"
+              destination2="signUp"
+              title1="Forgot Password"
+              title2="Sign Up"
+            />
           </View>
         </View>
       </ScrollView>

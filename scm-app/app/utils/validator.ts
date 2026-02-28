@@ -35,3 +35,11 @@ export const NewUserSchema = yup.object({
     .min(8, "Password should be at least eight characters long!")
     .required("Password is required"),
 });
+
+export const signInSchema = yup.object({
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup
+    .string()
+    .min(8, "Password should be at least eight characters long!")
+    .required("Password is required"),
+});

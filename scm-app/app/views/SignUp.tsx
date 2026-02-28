@@ -39,8 +39,8 @@ const SignUp = () => {
     const res = await runAxiosAsync<{ message: string }>(
       axios.post("http://10.56.22.118:3000/auth/sign-up", values),
     );
-    if(res?.message) {
-      showMessage({message:res.message, type:"success"})
+    if (res?.message) {
+      showMessage({ message: res.message, type: "success" });
     }
     setIsLoading(false);
   };
@@ -67,7 +67,7 @@ const SignUp = () => {
           <View style={styles.formContainer}>
             <FormInput
               placeholder="Name"
-              value={userInfo.name}
+              value={name}
               onChangeText={changeHandler("name")}
             />
             <FormInput
