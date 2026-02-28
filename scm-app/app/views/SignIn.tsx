@@ -13,10 +13,10 @@ import LoadingSpinner from "../ui/LoadingSpinner";
 import { signInSchema, yupValidator } from "../utils/validator";
 import { showMessage } from "react-native-flash-message";
 import { runAxiosAsync } from "../api/runAxiosAsync";
-import axios from "axios";
+import client from "../api/client";
 
 
-interface SignInRes {
+export interface SignInRes {
   profile: {
         id: string,
         email: string,
@@ -50,7 +50,7 @@ const SignIn = () => {
     }
 
     const res = await runAxiosAsync<SignInRes>(
-      axios.post("http://10.56.22.118:3000/auth/login", values),
+      client.post("/auth/login", values),
     );
     if (res) {
       console.log(res);      
@@ -100,7 +100,7 @@ const SignIn = () => {
               onPress={submitHandler}
               title={"Sign In"}
             >
-              {busy && <LoadingSpinner />}
+              {busy && <LoadingSpinner/>}
             </AppButton>
             <FormDivider style={styles.formDivider} />
             <FormNavigator

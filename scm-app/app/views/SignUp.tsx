@@ -9,11 +9,12 @@ import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AuthStackParamList } from "./navigator/auth/AuthNavigator";
 import { useState } from "react";
-import axios from "axios";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { NewUserSchema, yupValidator } from "../utils/validator";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import { showMessage } from "react-native-flash-message";
+import client from "../api/client";
+import { SignInRes } from "./SignIn";
 
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +38,15 @@ const SignUp = () => {
       });
     }
     const res = await runAxiosAsync<{ message: string }>(
-      axios.post("http://10.56.22.118:3000/auth/sign-up", values),
+      client.post("/auth/sign-up", values),
     );
     if (res?.message) {
       showMessage({ message: res.message, type: "success" });
+      const signInRes = await runAxiosAsync<SignInRes>(
+        client.post("/auth/login", values),
+      );
+      console.log(signInRes);
+      
     }
     setIsLoading(false);
   };
