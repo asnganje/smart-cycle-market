@@ -13,6 +13,7 @@ import axios from "axios";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { NewUserSchema, yupValidator } from "../utils/validator";
 import { runAxiosAsync } from "../api/runAxiosAsync";
+import { showMessage } from "react-native-flash-message";
 
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,10 +29,19 @@ const SignUp = () => {
   const submitHandler = async () => {
     setIsLoading(true);
     const { values, error } = await yupValidator(NewUserSchema, userInfo);
+    if (error) {
+      setIsLoading(false);
+      return showMessage({
+        message: error,
+        type: "danger",
+      });
+    }
     const res = await runAxiosAsync<{ message: string }>(
       axios.post("http://10.56.22.118:3000/auth/sign-up", values),
     );
-    console.log(res);
+    if(res?.message) {
+      showMessage({message:res.message, type:"success"})
+    }
     setIsLoading(false);
   };
 
