@@ -1,15 +1,15 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { Colors } from "../../utils/colors";
 import AuthNavigator from "./auth/AuthNavigator";
-import AppNavigator from "./app/AppNavigator";
-import { useDispatch, useSelector } from "react-redux";
-import { getAuthState, Profile, updateAuthState } from "../../store/auth";
+import { useDispatch } from "react-redux";
+import { Profile, updateAuthState } from "../../store/auth";
 import { useEffect } from "react";
 import client from "../../api/client";
 import * as SecureStore from "expo-secure-store";
 import { runAxiosAsync } from "../../api/runAxiosAsync";
 import LoadingSpinnerAnimate from "../../ui/LoadingSpinnerAnimate";
 import useAuth from "../../hooks/useAuth";
+import TabNavigator from "./tab/TabNavigator";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -47,7 +47,7 @@ const Navigator = () => {
   return (
     <NavigationContainer theme={MyTheme}>
       <LoadingSpinnerAnimate visible={authState.pending} />
-      {!isLoggedIn ? <AuthNavigator /> : <AppNavigator />}
+      {!isLoggedIn ? <AuthNavigator /> :  <TabNavigator />}
     </NavigationContainer>
   );
 };
