@@ -8,9 +8,44 @@ import FormNavigator from "../ui/FormNavigator";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AuthStackParamList } from "./navigator/auth/AuthNavigator";
+import { useState } from "react";
+import { forgotPassSchema, yupValidator } from "../utils/validator";
+import { showMessage } from "react-native-flash-message";
+import LoadingSpinner from "../ui/LoadingSpinner";
+import client from "../api/client";
+import { runAxiosAsync } from "../api/runAxiosAsync";
 
 const ForgotPass = () => {
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const changeHandler = (text: string) => {
+    setEmail(text);
+  };
+
+  const submitHandler = async () => {
+    const { values, error } = await yupValidator(forgotPassSchema, { email });
+    if (error) {
+      return showMessage({
+        message: error,
+        type: "danger",
+      });
+    }
+    setBusy(true);
+    if (values) {
+      const res = await runAxiosAsync<{ message: string }>(
+        client.post("http://10.56.22.118:3000/auth/forget-pass", values),
+      );
+      if (res) {
+        setBusy(false);
+      return showMessage({
+        message: res.message,
+        type: "success",
+      });
+    }
+    }
+  };
 
   const navigationHandler = (destination: string) => {
     if (destination === "signUp") {
@@ -34,8 +69,16 @@ const ForgotPass = () => {
               placeholder="Email"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={changeHandler}
             />
-            <AppButton title={"Request link"} />
+            <AppButton
+              isLoading={busy}
+              onPress={submitHandler}
+              title={"Request link"}
+            >
+              {busy && <LoadingSpinner />}
+            </AppButton>
             <FormDivider style={styles.formDivider} />
             <FormNavigator
               onPress={navigationHandler}

@@ -12,7 +12,7 @@ import { useState } from "react";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { signInSchema, yupValidator } from "../utils/validator";
 import { showMessage } from "react-native-flash-message";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import useAuth from "../hooks/useAuth";
 import { getAuthState } from "../store/auth";
 
