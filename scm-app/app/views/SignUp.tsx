@@ -14,41 +14,38 @@ import { NewUserSchema, yupValidator } from "../utils/validator";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import { showMessage } from "react-native-flash-message";
 import client from "../api/client";
-import { SignInRes } from "./SignIn";
+import useAuth from "../hooks/useAuth";
 
 const SignUp = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
     password: "",
   });
+  const [busy, setBusy] = useState(false)
+
+  const {signIn} = useAuth()
   const { name, email, password } = userInfo;
   const changeHandler = (key: string) => (text: string) =>
     setUserInfo({ ...userInfo, [key]: text });
 
   const submitHandler = async () => {
-    setIsLoading(true);
     const { values, error } = await yupValidator(NewUserSchema, userInfo);
     if (error) {
-      setIsLoading(false);
       return showMessage({
         message: error,
         type: "danger",
       });
     }
+    setBusy(true)
     const res = await runAxiosAsync<{ message: string }>(
       client.post("/auth/sign-up", values),
     );
     if (res?.message) {
+      setBusy(false)
       showMessage({ message: res.message, type: "success" });
-      const signInRes = await runAxiosAsync<SignInRes>(
-        client.post("/auth/login", values),
-      );
-      console.log(signInRes);
-      
+      signIn(values!)
     }
-    setIsLoading(false);
   };
 
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
@@ -90,11 +87,11 @@ const SignUp = () => {
               onChangeText={changeHandler("password")}
             />
             <AppButton
-              isLoading={isLoading}
+              isLoading={busy}
               title={"Sign Up"}
               onPress={submitHandler}
             >
-              {isLoading && <LoadingSpinner />}
+              {busy && <LoadingSpinner />}
             </AppButton>
             <FormDivider style={styles.formDivider} />
             <FormNavigator

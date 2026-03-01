@@ -12,28 +12,13 @@ import { useState } from "react";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { signInSchema, yupValidator } from "../utils/validator";
 import { showMessage } from "react-native-flash-message";
-import { runAxiosAsync } from "../api/runAxiosAsync";
-import client from "../api/client";
-import { useDispatch } from "react-redux";
-import { updateAuthState } from "../store/auth";
-import * as SecureStore from "expo-secure-store"
-
-
-export interface SignInRes {
-  profile: {
-        id: string,
-        email: string,
-        name: string,
-        tokens: {
-            refresh:string,
-            access: string
-        }
-    }
-}
+import { useDispatch, useSelector } from "react-redux";
+import useAuth from "../hooks/useAuth";
+import { getAuthState } from "../store/auth";
 
 const SignIn = () => {
-  const [busy, setBusy] = useState(false);
-  const dispatch = useDispatch()
+  const {pending} = useSelector(getAuthState)
+  const { signIn } = useAuth()
   const [userInfo, setUserInfo] = useState({
     email: "",
     password: "",
@@ -43,29 +28,15 @@ const SignIn = () => {
     setUserInfo({ ...userInfo, [key]: text });
 
   const submitHandler = async () => {
-    setBusy(true);
     const { values, error } = await yupValidator(signInSchema, userInfo);
     if (error) {
-      setBusy(false);
       return showMessage({
         message: error,
         type: "danger",
       });
     }
+    if(values) signIn(values)
 
-    const res = await runAxiosAsync<SignInRes>(
-      client.post("/auth/login", values),
-    );
-    if (res) {
-      await SecureStore.setItemAsync("access-token", res.profile.tokens.access)
-      await SecureStore.setItemAsync("refresh-token", res.profile.tokens.refresh)
-      dispatch(updateAuthState({profile:res.profile, pending:false}))     
-      showMessage({
-        message: "Login successful",
-        type: "success",
-      });
-    }
-    setBusy(false);
   };
 
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
@@ -102,11 +73,11 @@ const SignIn = () => {
               secureTextEntry
             />
             <AppButton
-              isLoading={busy}
+              isLoading={pending}
               onPress={submitHandler}
               title={"Sign In"}
             >
-              {busy && <LoadingSpinner/>}
+              {pending && <LoadingSpinner/>}
             </AppButton>
             <FormDivider style={styles.formDivider} />
             <FormNavigator

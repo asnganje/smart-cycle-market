@@ -9,6 +9,7 @@ import client from "../../api/client";
 import * as SecureStore from "expo-secure-store";
 import { runAxiosAsync } from "../../api/runAxiosAsync";
 import LoadingSpinnerAnimate from "../../ui/LoadingSpinnerAnimate";
+import useAuth from "../../hooks/useAuth";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -19,10 +20,8 @@ const MyTheme = {
 };
 
 const Navigator = () => {
-  const { pending, profile } = useSelector(getAuthState);
   const dispatch = useDispatch();
-  const isLoggedIn = profile ? true : false;
-
+  const {isLoggedIn, authState} = useAuth()
   const fetchProfile = async () => {
     const accessToken = await SecureStore.getItemAsync("access-token");
     if (accessToken) {
@@ -47,7 +46,7 @@ const Navigator = () => {
   }, []);
   return (
     <NavigationContainer theme={MyTheme}>
-      <LoadingSpinnerAnimate visible={pending} />
+      <LoadingSpinnerAnimate visible={authState.pending} />
       {!isLoggedIn ? <AuthNavigator /> : <AppNavigator />}
     </NavigationContainer>
   );
