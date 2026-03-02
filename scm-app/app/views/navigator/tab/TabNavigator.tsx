@@ -5,6 +5,7 @@ import {
 import AppNavigator from "../app/AppNavigator";
 import ProfileNavigator from "../profile/ProfileNavigator";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import NewListing from "../../NewListing";
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +28,11 @@ const TabNavigator = () => {
         name="Home"
         component={AppNavigator}
         options={getOptions("home")}
+      />
+      <Tab.Screen
+        name="NewListing"
+        component={NewListing}
+        options={getOptions("plus-circle")}
       />
       <Tab.Screen
         name="Profile"
