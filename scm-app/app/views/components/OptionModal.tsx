@@ -12,13 +12,16 @@ interface OptionModalProps <T> {
 }
 
 const OptionModal = <T extends unknown>({ visible, onRequestClose, options, onPress, renderItem }: OptionModalProps<T>) => {
+  
+  const handleClose =() => onRequestClose(!visible)
+  
   return (
     <Modal
       transparent
       visible={visible}
-      onRequestClose={() => onRequestClose(!visible)}
+      onRequestClose={handleClose}
     >
-      <View style={styles.container}>
+      <TouchableOpacity onPress={handleClose} style={styles.container}>
         <View style={styles.innerContainer}>
           <ScrollView>
             {
@@ -30,7 +33,7 @@ const OptionModal = <T extends unknown>({ visible, onRequestClose, options, onPr
             }
           </ScrollView>
         </View>
-      </View>
+      </TouchableOpacity>
     </Modal>
   );
 };
