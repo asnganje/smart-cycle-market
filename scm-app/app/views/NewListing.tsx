@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import FormInput from "../ui/FormInput";
 import { s, vs } from "react-native-size-matters";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -8,6 +8,9 @@ import OptionModal from "./components/OptionModal";
 import { useState } from "react";
 import { categories } from "../utils/categories";
 import CategoryOption from "../ui/CategoryOption";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
+const isIOS = Platform.OS === "ios";
 
 const NewListing = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -26,18 +29,21 @@ const NewListing = () => {
         value={new Date()}
         onChange={() => {}}
       />
-      <TouchableOpacity style={{marginBottom: vs(10)}} onPress={() => setShowCategoryModal(true)}>
-        <Text>Category</Text>
+      <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
+        <View style={styles.categoryI}>
+          <Text>Category</Text>
+          <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
+        </View>
       </TouchableOpacity>
       <FormInput placeholder="Description" />
       <OptionModal
         options={categories}
         renderItem={(item) => {
-          const {name, icon} = item
-          return <CategoryOption name={name} icon = {icon}/>
+          const { name, icon } = item;
+          return <CategoryOption name={name} icon={icon} />;
         }}
         onPress={(item) => {
-          console.log(item)         
+          console.log(item);
         }}
         visible={showCategoryModal}
         onRequestClose={setShowCategoryModal}
@@ -58,6 +64,15 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     marginBottom: vs(20),
   },
+  categoryI: {
+    marginBottom: vs(10),
+    flexDirection: "row",
+    justifyContent:"space-between",
+    padding: isIOS ? 0 : s(8),
+    borderWidth: isIOS ? 0 : 1,
+    borderColor: isIOS ? "" : Colors.deActive,
+    borderRadius: s(5),
+  },
   iconContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -67,5 +82,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.primary,
     borderRadius: s(5),
-  }
+  },
 });

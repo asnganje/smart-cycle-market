@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Colors } from "../utils/colors";
@@ -43,12 +43,6 @@ const DatePicker: FC<DatePickerProps> = ({ title, value, onChange }) => {
 };
 export default DatePicker;
 const styles = StyleSheet.create({
-  container:{
-    flexDirection:"row",
-    alignItems:"center",
-    width:"100%",
-    marginBottom:s(15)
-  },
   title:{
     color:Colors.primary
   },
