@@ -5,7 +5,7 @@ import { Colors } from '../utils/colors'
 
 interface IAppButtonProps {
   style?: ViewStyle,
-  children: ReactNode,
+  children?: ReactNode,
   isLoading?:boolean,
   title:string,
   textStyle?:TextStyle,
