@@ -10,6 +10,7 @@ import { runAxiosAsync } from "../../api/runAxiosAsync";
 import LoadingSpinnerAnimate from "../../ui/LoadingSpinnerAnimate";
 import useAuth from "../../hooks/useAuth";
 import TabNavigator from "./tab/TabNavigator";
+import useClient from "../../hooks/useClient";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -22,12 +23,13 @@ const MyTheme = {
 const Navigator = () => {
   const dispatch = useDispatch();
   const {isLoggedIn, authState} = useAuth()
+  const {authClient} = useClient()
   const fetchProfile = async () => {
     const accessToken = await SecureStore.getItemAsync("access-token");
     if (accessToken) {
       dispatch(updateAuthState({ pending: true, profile: null }));
       const res = await runAxiosAsync<{ profile: Profile }>(
-        client.get("/auth/profile", {
+        authClient.get("/auth/profile", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

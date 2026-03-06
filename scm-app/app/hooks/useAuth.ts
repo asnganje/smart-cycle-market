@@ -25,6 +25,7 @@ export interface SignInRes {
 const useAuth = () => {
   const dispatch = useDispatch();
   const authState = useSelector(getAuthState);
+  
   const isLoggedIn = authState.profile ? true : false;
 
   const signIn = async (userInfo: UserInfo) => {
@@ -38,7 +39,18 @@ const useAuth = () => {
         "refresh-token",
         res.profile.tokens.refresh,
       );
-      dispatch(updateAuthState({ profile: res.profile, pending: false }));
+      dispatch(
+        updateAuthState({
+          profile: {
+            ...res.profile,
+            tokens: {
+              refresh: res.profile.tokens.refresh,
+              access: res.profile.tokens.access,
+            },
+          },
+          pending: false,
+        }),
+      );
       showMessage({
         message: "Login successful",
         type: "success",

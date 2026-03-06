@@ -74,7 +74,7 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
     return sendErrorRes(res, "Unauthorized request", 401);
   }
   const newAccessToken = jwt.sign({ id: user._id }, JWT_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "1m",
   });
   const newRefreshToken = jwt.sign({ id: user._id }, JWT_SECRET);
 
