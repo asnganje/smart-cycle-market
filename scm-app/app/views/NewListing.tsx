@@ -18,6 +18,8 @@ import CategoryOption from "../ui/CategoryOption";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AppButton from "../ui/AppButton";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
+import * as ImagePicker from "expo-image-picker";
+import { showMessage } from "react-native-flash-message";
 
 const isIOS = Platform.OS === "ios";
 
@@ -37,6 +39,7 @@ const defaultInfo = {
 const NewListing = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [productInfo, setProductInfo] = useState({ ...defaultInfo });
+  const [images, setImages] = useState<string[]>([])
 
   const { category, name, description, purchaseDate, price } = productInfo;
 
@@ -46,18 +49,37 @@ const NewListing = () => {
 
   const categoryChangeHandler = (item: Item) => {
     setProductInfo({ ...productInfo, category: item.name });
-    setShowCategoryModal(false)
+    setShowCategoryModal(false);
+  };
+
+  const imageSelectionHandler = async () => {
+    try {
+      const {assets} = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: false,
+        quality: 0.3,
+        mediaTypes: ['images'],
+        allowsMultipleSelection: true,
+      });
+      if(!assets) return
+      const imageUris = assets.map(({uri})=>uri)
+      setImages([...images, ...imageUris])
+    } catch (error) {
+      showMessage({
+        message: (error as any).message,
+        type:"danger"
+      })
+    }
   };
 
   const submitHandler = () => {
     console.log(productInfo);
-    setProductInfo(defaultInfo)
+    setProductInfo(defaultInfo);
   };
 
   return (
     <KeyBoardAvoider>
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={imageSelectionHandler}>
           <View style={styles.iconContainer}>
             <FontAwesome5 name="images" size={24} color="black" />
           </View>
@@ -83,7 +105,7 @@ const NewListing = () => {
         />
         <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
           <View style={styles.categoryI}>
-            <Text>{category || "Category" }</Text>
+            <Text>{category || "Category"}</Text>
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
           </View>
         </TouchableOpacity>
