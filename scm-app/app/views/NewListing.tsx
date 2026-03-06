@@ -1,4 +1,6 @@
 import {
+  FlatList,
+  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -39,7 +41,7 @@ const defaultInfo = {
 const NewListing = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [productInfo, setProductInfo] = useState({ ...defaultInfo });
-  const [images, setImages] = useState<string[]>([])
+  const [images, setImages] = useState<string[]>([]);
 
   const { category, name, description, purchaseDate, price } = productInfo;
 
@@ -54,20 +56,20 @@ const NewListing = () => {
 
   const imageSelectionHandler = async () => {
     try {
-      const {assets} = await ImagePicker.launchImageLibraryAsync({
+      const { assets } = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: false,
         quality: 0.3,
-        mediaTypes: ['images'],
+        mediaTypes: ["images"],
         allowsMultipleSelection: true,
       });
-      if(!assets) return
-      const imageUris = assets.map(({uri})=>uri)
-      setImages([...images, ...imageUris])
+      if (!assets) return;
+      const imageUris = assets.map(({ uri }) => uri);
+      setImages([...images, ...imageUris]);
     } catch (error) {
       showMessage({
         message: (error as any).message,
-        type:"danger"
-      })
+        type: "danger",
+      });
     }
   };
 
@@ -79,12 +81,25 @@ const NewListing = () => {
   return (
     <KeyBoardAvoider>
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-        <TouchableOpacity onPress={imageSelectionHandler}>
-          <View style={styles.iconContainer}>
-            <FontAwesome5 name="images" size={24} color="black" />
-          </View>
-          <Text style={styles.btnTitle}>Add images</Text>
-        </TouchableOpacity>
+        <View style={styles.imageContainer}>
+          <TouchableOpacity onPress={imageSelectionHandler}>
+            <View>
+              <View style={styles.iconContainer}>
+                <FontAwesome5 name="images" size={24} color="black" />
+              </View>
+              <Text style={styles.btnTitle}>Add images</Text>
+            </View>
+          </TouchableOpacity>
+          <FlatList
+            data={images}
+            renderItem={({ item }) => (
+              <Image style={styles.selectedImg} source={{ uri: item }} />
+            )}
+            keyExtractor={(item)=>item}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
         <FormInput
           placeholder="Product name"
           value={name}
@@ -161,5 +176,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.primary,
     borderRadius: s(5),
+  },
+  imageContainer: {
+    flexDirection: "row",
+    gap: s(5),
+  },
+  selectedImg: {
+    height: s(70),
+    width: s(70),
+    borderRadius: s(7),
+    marginRight: s(3),
   },
 });
