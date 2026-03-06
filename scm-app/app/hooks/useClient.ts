@@ -34,13 +34,14 @@ const useClient = () => {
   );
 
   const refreshAuthLogic = async (failedRequest: any) => {
-    const refreshToken = await SecureStore.getItemAsync("refresh-token");
+    const refreshToken = await SecureStore.getItemAsync("refresh-token");    
     const options = {
       method: "POST",
       data: { refreshToken },
       url: `${baseURL}/auth/refresh-token`,
     };
-    const res = await runAxiosAsync<Response>(axios(options));
+    
+    const res = await runAxiosAsync<Response>(axios(options));    
     if (res?.tokens) {
       failedRequest.response.config.headers.Authorization = `Bearer ${res.tokens.access}`;
       await SecureStore.setItemAsync("access-token", res.tokens.access);

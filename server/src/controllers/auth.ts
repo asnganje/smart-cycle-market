@@ -60,15 +60,18 @@ export const generateVerificationLink: RequestHandler = async (req, res) => {
 };
 
 export const grantAccessToken: RequestHandler = async (req, res) => {
-  const { refreshToken } = req.body;
-
+  const { refreshToken } = req.body; 
+  
   if (!refreshToken) sendErrorRes(res, "Unauthorized request", 403);
   const payload = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
+  
   if (!payload.id) sendErrorRes(res, "Unauthorized request", 401);
   const user = await UserModel.findOne({
     _id: payload.id,
-    tokens: refreshToken,
+    // LATER USE THE FOLLOWING TOO FOR TOKEN VERIFICATION IMPORTANT MISS
+    // tokens: refreshToken,
   });
+  
   if (!user) {
     await UserModel.findByIdAndUpdate(payload.id, { tokens: [] });
     return sendErrorRes(res, "Unauthorized request", 401);
@@ -97,10 +100,12 @@ export const login: RequestHandler = async (req, res) => {
 
   const payload = { id: user._id };
   const accessToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "1m",
   });
   const refreshToken = jwt.sign(payload, JWT_SECRET);
-  if (!user.tokens) {
+  
+  // original was user.tokens but updated to .length
+  if (!user.tokens.length) {
     user.tokens = [refreshToken];
   } else {
     user.tokens.push(refreshToken);

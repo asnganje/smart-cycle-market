@@ -12,7 +12,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Colors } from "../utils/colors";
 import DatePicker from "../ui/DatePicker";
 import OptionModal from "./components/OptionModal";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { categories } from "../utils/categories";
 import CategoryOption from "../ui/CategoryOption";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -21,8 +21,39 @@ import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 
 const isIOS = Platform.OS === "ios";
 
+interface Item {
+  name: string;
+  icon: ReactNode;
+}
+
+const defaultInfo = {
+  name: "",
+  description: "",
+  category: "",
+  price: "",
+  purchaseDate: new Date(),
+};
+
 const NewListing = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [productInfo, setProductInfo] = useState({ ...defaultInfo });
+
+  const { category, name, description, purchaseDate, price } = productInfo;
+
+  const handleChange = (name: string) => (text: string) => {
+    setProductInfo({ ...productInfo, [name]: text });
+  };
+
+  const categoryChangeHandler = (item: Item) => {
+    setProductInfo({ ...productInfo, category: item.name });
+    setShowCategoryModal(false)
+  };
+
+  const submitHandler = () => {
+    console.log(productInfo);
+    setProductInfo(defaultInfo)
+  };
+
   return (
     <KeyBoardAvoider>
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -32,30 +63,44 @@ const NewListing = () => {
           </View>
           <Text style={styles.btnTitle}>Add images</Text>
         </TouchableOpacity>
-        <FormInput placeholder="Product name" />
-        <FormInput placeholder="Price" />
+        <FormInput
+          placeholder="Product name"
+          value={name}
+          onChangeText={handleChange("name")}
+        />
+        <FormInput
+          placeholder="Price"
+          value={price}
+          onChangeText={handleChange("price")}
+          keyboardType="numeric"
+        />
         <DatePicker
           title="Purchase date: "
-          value={new Date()}
-          onChange={() => {}}
+          value={purchaseDate}
+          onChange={(date) =>
+            setProductInfo({ ...productInfo, purchaseDate: date })
+          }
         />
         <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
           <View style={styles.categoryI}>
-            <Text>Category</Text>
+            <Text>{category || "Category" }</Text>
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
           </View>
         </TouchableOpacity>
-        <FormInput placeholder="Description" multiline />
-        <AppButton title="List Product" />
+        <FormInput
+          placeholder="Description"
+          value={description}
+          onChangeText={handleChange("description")}
+          multiline
+        />
+        <AppButton title="List Product" onPress={submitHandler} />
         <OptionModal
           options={categories}
           renderItem={(item) => {
             const { name, icon } = item;
             return <CategoryOption name={name} icon={icon} />;
           }}
-          onPress={(item) => {
-            console.log(item);
-          }}
+          onPress={(item) => categoryChangeHandler(item)}
           visible={showCategoryModal}
           onRequestClose={setShowCategoryModal}
         />
