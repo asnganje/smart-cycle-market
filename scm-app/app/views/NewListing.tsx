@@ -22,6 +22,7 @@ import AppButton from "../ui/AppButton";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import * as ImagePicker from "expo-image-picker";
 import { showMessage } from "react-native-flash-message";
+import HorizontalImageList from "./components/HorizontalImageList";
 
 const isIOS = Platform.OS === "ios";
 
@@ -90,15 +91,10 @@ const NewListing = () => {
               <Text style={styles.btnTitle}>Add images</Text>
             </View>
           </TouchableOpacity>
-          <FlatList
-            data={images}
-            renderItem={({ item }) => (
-              <Image style={styles.selectedImg} source={{ uri: item }} />
-            )}
-            keyExtractor={(item)=>item}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
+          <HorizontalImageList data={images} onLongPress={(img)=> {
+            console.log(img);
+            
+          }}/>
         </View>
         <FormInput
           placeholder="Product name"
@@ -180,11 +176,5 @@ const styles = StyleSheet.create({
   imageContainer: {
     flexDirection: "row",
     gap: s(5),
-  },
-  selectedImg: {
-    height: s(70),
-    width: s(70),
-    borderRadius: s(7),
-    marginRight: s(3),
-  },
+  }
 });
