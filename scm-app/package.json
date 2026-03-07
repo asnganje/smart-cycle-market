@@ -23,6 +23,7 @@
     "expo-status-bar": "~3.0.9",
     "lottie-react-native": "^7.3.6",
     "luxon": "^3.7.2",
+    "mime": "^4.1.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-flash-message": "^0.4.2",

@@ -51,11 +51,12 @@ export const forgotPassSchema = yup.object({
 export const newProductSchema = yup.object({
   name: yup.string().required("Product name is required"),
   description: yup.string().required("Product description is required"),
+  category: yup.string().required("Product category is required"),
   price: yup
     .string()
     .transform((value) => {
       if (isNaN(+value)) return "";
-      return +value;
+      return value;
     })
     .required("Product price is required!"),
   purchaseDate: yup.date().required("Purchasing date is required")

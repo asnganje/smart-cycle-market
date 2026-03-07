@@ -1,6 +1,4 @@
 import {
-  FlatList,
-  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -23,6 +21,11 @@ import KeyBoardAvoider from "../ui/KeyBoardAvoider";
 import * as ImagePicker from "expo-image-picker";
 import { showMessage } from "react-native-flash-message";
 import HorizontalImageList from "./components/HorizontalImageList";
+import { newProductSchema, yupValidator } from "../utils/validator";
+import mime from "mime";
+import useClient from "../hooks/useClient";
+import { runAxiosAsync } from "../api/runAxiosAsync";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 const isIOS = Platform.OS === "ios";
 
@@ -40,11 +43,13 @@ const defaultInfo = {
 };
 
 const NewListing = () => {
+  const [pending, setPending] = useState(false)
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [productInfo, setProductInfo] = useState({ ...defaultInfo });
   const [images, setImages] = useState<string[]>([]);
-  const [selectImg, setSelectedImg] = useState("")
+  const [selectImg, setSelectedImg] = useState("");
+  const { authClient } = useClient();
 
   const { category, name, description, purchaseDate, price } = productInfo;
 
@@ -78,8 +83,41 @@ const NewListing = () => {
     }
   };
 
-  const submitHandler = () => {
-    console.log(productInfo);
+  const submitHandler = async () => {
+    const { error } = await yupValidator(newProductSchema, productInfo);
+    if (error) {
+      return showMessage({ message: error, type: "danger" });
+    }
+    setPending(true)
+    const formData = new FormData();
+
+    type productInfoKeys = keyof typeof productInfo;
+
+    for (let key in productInfo) {
+      const value = productInfo[key as productInfoKeys];
+      if (value instanceof Date) formData.append(key, value.toISOString());
+      else {
+        formData.append(key, value);
+      }
+    }
+
+    const newImages = images.map((img, idx) => ({
+      name: `name_${idx}`,
+      type: mime.getType(img),
+      uri: img,
+    }));
+
+    for (let img of newImages) {
+      formData.append("images", img as any);
+    }
+    const res = await runAxiosAsync(authClient.post("/products/list", formData, {
+      headers:{
+        "Content-Type":"multipart/form-data"
+      }
+    }))
+    setPending(false)
+    console.log(res);
+    
     setProductInfo(defaultInfo);
   };
 
@@ -98,7 +136,7 @@ const NewListing = () => {
           <HorizontalImageList
             data={images}
             onLongPress={(img) => {
-              setSelectedImg(img)
+              setSelectedImg(img);
               setShowImageOptions(true);
             }}
           />
@@ -133,7 +171,9 @@ const NewListing = () => {
           onChangeText={handleChange("description")}
           multiline
         />
-        <AppButton title="List Product" onPress={submitHandler} />
+        <AppButton isLoading={pending} title="List Product" onPress={submitHandler}>
+          {pending && <LoadingSpinner />}
+        </AppButton>
         <OptionModal
           options={categories}
           renderItem={(item) => {
@@ -151,10 +191,10 @@ const NewListing = () => {
           }}
           onPress={(item) => {
             if (item.id === "remove") {
-              const newImages = images.filter((img) => img !== selectImg)
-              setImages([...newImages])
+              const newImages = images.filter((img) => img !== selectImg);
+              setImages([...newImages]);
             }
-            setShowImageOptions(false)
+            setShowImageOptions(false);
           }}
           visible={showImageOptions}
           onRequestClose={setShowImageOptions}
