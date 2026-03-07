@@ -134,16 +134,16 @@ const NewListing = () => {
           multiline
         />
         <AppButton title="List Product" onPress={submitHandler} />
-        {/* <OptionModal
+        <OptionModal
           options={categories}
           renderItem={(item) => {
             const { name, icon } = item;
             return <CategoryOption name={name} icon={icon} />;
           }}
           onPress={(item) => categoryChangeHandler(item)}
-          visible={showImageOptions}
+          visible={showCategoryModal}
           onRequestClose={setShowCategoryModal}
-        /> */}
+        />
         <OptionModal
           options={imageOptions}
           renderItem={(item) => {
