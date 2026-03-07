@@ -41,10 +41,14 @@ const defaultInfo = {
 
 const NewListing = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
   const [productInfo, setProductInfo] = useState({ ...defaultInfo });
   const [images, setImages] = useState<string[]>([]);
+  const [selectImg, setSelectedImg] = useState("")
 
   const { category, name, description, purchaseDate, price } = productInfo;
+
+  const imageOptions = [{ value: "Remove image", id: "remove" }];
 
   const handleChange = (name: string) => (text: string) => {
     setProductInfo({ ...productInfo, [name]: text });
@@ -91,10 +95,13 @@ const NewListing = () => {
               <Text style={styles.btnTitle}>Add images</Text>
             </View>
           </TouchableOpacity>
-          <HorizontalImageList data={images} onLongPress={(img)=> {
-            console.log(img);
-            
-          }}/>
+          <HorizontalImageList
+            data={images}
+            onLongPress={(img) => {
+              setSelectedImg(img)
+              setShowImageOptions(true);
+            }}
+          />
         </View>
         <FormInput
           placeholder="Product name"
@@ -127,15 +134,30 @@ const NewListing = () => {
           multiline
         />
         <AppButton title="List Product" onPress={submitHandler} />
-        <OptionModal
+        {/* <OptionModal
           options={categories}
           renderItem={(item) => {
             const { name, icon } = item;
             return <CategoryOption name={name} icon={icon} />;
           }}
           onPress={(item) => categoryChangeHandler(item)}
-          visible={showCategoryModal}
+          visible={showImageOptions}
           onRequestClose={setShowCategoryModal}
+        /> */}
+        <OptionModal
+          options={imageOptions}
+          renderItem={(item) => {
+            return <Text style={styles.imageOptions}>{item.value}</Text>;
+          }}
+          onPress={(item) => {
+            if (item.id === "remove") {
+              const newImages = images.filter((img) => img !== selectImg)
+              setImages([...newImages])
+            }
+            setShowImageOptions(false)
+          }}
+          visible={showImageOptions}
+          onRequestClose={setShowImageOptions}
         />
       </ScrollView>
     </KeyBoardAvoider>
@@ -176,5 +198,11 @@ const styles = StyleSheet.create({
   imageContainer: {
     flexDirection: "row",
     gap: s(5),
-  }
+  },
+  imageOptions: {
+    fontWeight: "600",
+    color: "red",
+    fontSize: 18,
+    padding: 10,
+  },
 });
