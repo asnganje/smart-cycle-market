@@ -116,9 +116,11 @@ const NewListing = () => {
       }
     }))
     setPending(false)
+    if (res) {
+      setProductInfo({...defaultInfo});
+      setImages([])
+    }
     console.log(res);
-    
-    setProductInfo(defaultInfo);
   };
 
   return (
