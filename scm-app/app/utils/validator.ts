@@ -1,19 +1,19 @@
 import * as yup from "yup";
 
-type ValidationResult<T> = { error?: string; values?: T } 
+type ValidationResult<T> = { error?: string; values?: T };
 
 export const yupValidator = async <T extends object>(
   schema: yup.Schema,
   values: T,
-): Promise<ValidationResult<T>>=> {
+): Promise<ValidationResult<T>> => {
   try {
     const data = await schema.validate(values);
-    return {values: data}
+    return { values: data };
   } catch (error) {
     if (error instanceof yup.ValidationError) {
-      return {error: error.message}
+      return { error: error.message };
     } else {
-      return {error: (error as any).message}
+      return { error: (error as any).message };
     }
   }
 };
@@ -45,5 +45,18 @@ export const signInSchema = yup.object({
 });
 
 export const forgotPassSchema = yup.object({
-  email: yup.string().email("Invalid email").required("Email is required")
+  email: yup.string().email("Invalid email").required("Email is required"),
+});
+
+export const newProductSchema = yup.object({
+  name: yup.string().required("Product name is required"),
+  description: yup.string().required("Product description is required"),
+  price: yup
+    .string()
+    .transform((value) => {
+      if (isNaN(+value)) return "";
+      return +value;
+    })
+    .required("Product price is required!"),
+  purchaseDate: yup.date().required("Purchasing date is required")
 });
