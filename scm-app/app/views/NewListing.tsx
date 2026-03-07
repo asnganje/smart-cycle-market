@@ -117,6 +117,10 @@ const NewListing = () => {
     }))
     setPending(false)
     if (res) {
+      showMessage({
+        message:res.message,
+        type:"success"
+      })
       setProductInfo({...defaultInfo});
       setImages([])
     }
