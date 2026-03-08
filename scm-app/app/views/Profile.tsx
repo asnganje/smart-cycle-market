@@ -6,9 +6,19 @@ import { s, vs } from "react-native-size-matters";
 import size from "../utils/size";
 import FormDivider from "../ui/FormDivider";
 import ProfileOptionListItem from "./components/ProfileOptionListItem";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
 const Profile = () => {
   const { authState } = useAuth();
   const { profile } = authState;
+  const {navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
+  const onMessagePress = () => {
+    navigate("chats")
+  }
+
+  const onListingPress = () => {
+    navigate("listings")
+  }
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
@@ -23,11 +33,13 @@ const Profile = () => {
         antIconName="message"
         active
         title="Messages"
+        onPress={onMessagePress}
         style={styles.profileOptionMarginB}
       />
       <ProfileOptionListItem
         antIconName="appstore"
         title="Your listings"
+        onPress={onListingPress}
         style={styles.profileOptionMarginB}
       />
       <ProfileOptionListItem antIconName="logout" title="Logout" />

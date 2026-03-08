@@ -1,12 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "../../Home";
 import Profile from "../../Profile";
+import Chats from "../../Chats";
+import Listings from "../../Listings";
 
-export type AppStackParamList = {
-  home: undefined;
+export type ProfileNavigatorParamList = {
+  profile: undefined;
+  chats: undefined;
+  listings: undefined;
 };
 
-const Stack = createNativeStackNavigator<AppStackParamList>();
+const Stack = createNativeStackNavigator<ProfileNavigatorParamList>();
 
 const ProfileNavigator = () => {
   return (
@@ -15,7 +18,9 @@ const ProfileNavigator = () => {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="home" component={Profile} />
+      <Stack.Screen name="profile" component={Profile} />
+      <Stack.Screen name="chats" component={Chats} />
+      <Stack.Screen name="listings" component={Listings} />
     </Stack.Navigator>
   );
 };
