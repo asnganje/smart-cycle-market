@@ -4,6 +4,7 @@ import { runAxiosAsync } from "../api/runAxiosAsync";
 import * as SecureStore from "expo-secure-store";
 import { getAuthState, updateAuthState } from "../store/auth";
 import { showMessage } from "react-native-flash-message";
+import useClient from "./useClient";
 
 type UserInfo = {
   email: string;
@@ -15,6 +16,7 @@ export interface SignInRes {
     id: string;
     email: string;
     name: string;
+    avatar: string;
     tokens: {
       refresh: string;
       access: string;
@@ -25,7 +27,8 @@ export interface SignInRes {
 const useAuth = () => {
   const dispatch = useDispatch();
   const authState = useSelector(getAuthState);
-  
+  const { authClient } = useClient();
+
   const isLoggedIn = authState.profile ? true : false;
 
   const signIn = async (userInfo: UserInfo) => {
@@ -60,7 +63,21 @@ const useAuth = () => {
     }
   };
 
-  return { signIn, authState, isLoggedIn };
+  const signOut = async () => {
+    const token = await SecureStore.getItemAsync("refresh-token");
+    if (token) {
+      dispatch(updateAuthState({ profile: authState.profile, pending: true }));
+      await runAxiosAsync(
+        authClient.post("/auth/sign-out", { refreshToken: token }),
+      );
+
+      await SecureStore.deleteItemAsync("refresh-token");
+      await SecureStore.deleteItemAsync("access-token");
+      dispatch(updateAuthState({ profile: null, pending: false }));
+    }
+  };
+
+  return { signIn, authState, isLoggedIn, signOut };
 };
 
 export default useAuth;

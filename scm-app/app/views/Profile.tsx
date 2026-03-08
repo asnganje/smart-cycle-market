@@ -2,14 +2,14 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import AvatarView from "../ui/AvatarView";
 import useAuth from "../hooks/useAuth";
 import { Colors } from "../utils/colors";
-import { s, vs } from "react-native-size-matters";
+import { vs } from "react-native-size-matters";
 import size from "../utils/size";
 import FormDivider from "../ui/FormDivider";
 import ProfileOptionListItem from "./components/ProfileOptionListItem";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
 const Profile = () => {
-  const { authState } = useAuth();
+  const { authState, signOut } = useAuth();
   const { profile } = authState;
   const {navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
   const onMessagePress = () => {
@@ -42,7 +42,7 @@ const Profile = () => {
         onPress={onListingPress}
         style={styles.profileOptionMarginB}
       />
-      <ProfileOptionListItem antIconName="logout" title="Logout" />
+      <ProfileOptionListItem antIconName="logout" title="Logout" onPress={signOut}/>
     </ScrollView>
   );
 };

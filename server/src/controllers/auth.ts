@@ -60,8 +60,7 @@ export const generateVerificationLink: RequestHandler = async (req, res) => {
 };
 
 export const grantAccessToken: RequestHandler = async (req, res) => {
-  const { refreshToken } = req.body; 
-  
+  const { refreshToken } = req.body;     
   if (!refreshToken) sendErrorRes(res, "Unauthorized request", 403);
   const payload = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
   
@@ -128,10 +127,15 @@ export const sendProfile: RequestHandler = async (req, res) => {
 
 export const signOut: RequestHandler = async (req, res) => {
   const { refreshToken } = req.body;
-  const user = await UserModel.findOne({
-    _id: req.user.id,
-    tokens: refreshToken,
-  });
+  
+  // changed from findOne  ----REMEMBER
+  const user = await UserModel.findById(
+    // {
+    // _id: 
+    req.user.id,
+    // tokens: refreshToken,
+  // }
+);
   if (!user)
     return sendErrorRes(res, "Unauthorized request, user not found!", 403);
 
