@@ -5,6 +5,7 @@ export type Profile = {
   id: any;
   email: string;
   name: string;
+  avatar:string,
   tokens: {
     refresh: string;
     access: string;
