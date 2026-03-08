@@ -116,6 +116,7 @@ export const login: RequestHandler = async (req, res) => {
       id: user._id,
       email: user.email,
       name: user.name,
+      avatar: user.avatar,
       tokens: { refresh: refreshToken, access: accessToken },
     },
   });
