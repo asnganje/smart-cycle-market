@@ -13,22 +13,9 @@ import { useEffect, useState } from "react";
 import size from "../utils/size";
 import ProductImage from "../ui/ProductImage";
 import { s, vs } from "react-native-size-matters";
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  thumbnail?: string;
-  images?: string[];
-  description: string;
-  date: Date;
-  seller: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-};
+import { Product } from "./SingleProduct";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
 
 type ListingsRes = {
   products: Product[];
@@ -37,6 +24,7 @@ type ListingsRes = {
 const Listings = () => {
   const [listings, setListings] = useState<Product[]>([]);
   const { authClient } = useClient();
+  const { navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
 
   const fetchListings = async () => {
     const res = await runAxiosAsync<ListingsRes>(
@@ -61,7 +49,7 @@ const Listings = () => {
           contentContainerStyle={styles.flatlist}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity style={styles.listItem}>
+              <TouchableOpacity onPress={()=>navigate("singleProduct", {product: item})} style={styles.listItem}>
                 <ProductImage uri={item.thumbnail} />
                 <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
               </TouchableOpacity>
