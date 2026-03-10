@@ -37,5 +37,5 @@ export const getAuthState = createSelector(
   (state: RootState) => state,
   (state) => state.auth,
 );
-const authReducer = authSlice.reducer;
+const authReducer = authSlice.reducer; 
 export default authReducer;

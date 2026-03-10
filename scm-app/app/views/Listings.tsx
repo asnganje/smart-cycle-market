@@ -13,18 +13,21 @@ import { useEffect, useState } from "react";
 import size from "../utils/size";
 import ProductImage from "../ui/ProductImage";
 import { s, vs } from "react-native-size-matters";
-import { Product } from "./SingleProduct";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
+import { getListingsState, Product, updateListings } from "../store/listings";
+import { useDispatch, useSelector } from "react-redux";
 
 type ListingsRes = {
   products: Product[];
 };
 
 const Listings = () => {
-  const [listings, setListings] = useState<Product[]>([]);
+  const listings = useSelector(getListingsState)
   const [fetching, setFetching] = useState(false);
   const { authClient } = useClient();
+  const dispatch = useDispatch()
+
   const { navigate } =
     useNavigation<NavigationProp<ProfileNavigatorParamList>>();
 
@@ -36,7 +39,7 @@ const Listings = () => {
 
     setFetching(false);
     if (res) {
-      setListings(res.products);
+      dispatch(updateListings(res.products))
     }
   };
 
