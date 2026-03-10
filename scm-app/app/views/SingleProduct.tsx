@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
 import { FC, useState } from "react";
 import AppHeader from "./components/AppHeader";
@@ -8,7 +8,7 @@ import ProductDetail from "./components/ProductDetail";
 import useAuth from "../hooks/useAuth";
 import OptionBtn from "../ui/OptionBtn";
 import OptionModal from "./components/OptionModal";
-import { Feather } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import { Colors } from "../utils/colors";
 import { s, vs } from "react-native-size-matters";
 import useClient from "../hooks/useClient";
@@ -17,8 +17,7 @@ import { showMessage } from "react-native-flash-message";
 import LoadingSpinnerAnimate from "../ui/LoadingSpinnerAnimate";
 import { useDispatch } from "react-redux";
 import { deleteItem } from "../store/listings";
-
-
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 
 type SingleProductProps = NativeStackScreenProps<
   ProfileNavigatorParamList,
@@ -39,25 +38,28 @@ const menuOptions = [
 const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
   const { product } = route.params;
   const { authState } = useAuth();
-  const { authClient } = useClient()
-  const [busy, setBusy] = useState(false)
+  const { authClient } = useClient();
+  const [busy, setBusy] = useState(false);
   const isAdmin = authState.profile?.id === product?.seller.id;
   const [showMenu, setShowMenu] = useState(false);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const {navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
 
   const confirmDelete = async () => {
-    const id = product?.id
-    if(!id) return;
-    setBusy(true)
-    const res = await runAxiosAsync<{message:string}>(authClient.delete("/products/"+id))
-    setBusy(false)
-    if(res?.message) {
-      dispatch(deleteItem({id}))
+    const id = product?.id;
+    if (!id) return;
+    setBusy(true);
+    const res = await runAxiosAsync<{ message: string }>(
+      authClient.delete("/products/" + id),
+    );
+    setBusy(false);
+    if (res?.message) {
+      dispatch(deleteItem({ id }));
       showMessage({
         message: res.message,
-        type:"success"
-      })
-      navigation.navigate("listings")
+        type: "success",
+      });
+      navigation.navigate("listings");
     }
   };
 
@@ -80,7 +82,12 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
           <OptionBtn visible={isAdmin} onPress={() => setShowMenu(true)} />
         }
       />
-      <View>{product ? <ProductDetail product={product} /> : <></>}</View>
+      <View>
+        {product ? <ProductDetail product={product} /> : <></>}
+        <TouchableOpacity onPress={()=>navigate("chatWindow")} style={styles.messageBtn}>
+          <AntDesign name="message" size={20} color={Colors.white} />
+        </TouchableOpacity>
+      </View>
       <OptionModal
         options={menuOptions}
         renderItem={({ icon, name }) => (
@@ -97,7 +104,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
           }
         }}
       />
-      <LoadingSpinnerAnimate visible={busy}/>
+      <LoadingSpinnerAnimate visible={busy} />
     </>
   );
 };
@@ -112,4 +119,15 @@ const styles = StyleSheet.create({
     paddingLeft: s(5),
     color: Colors.primary,
   },
+  messageBtn:{
+    width: s(50),
+    height:s(50),
+    borderRadius:s(25),
+    backgroundColor:Colors.active,
+    justifyContent:"center",
+    alignItems:"center",
+    position:"absolute",
+    right:s(20),
+    bottom:s(40)
+  }
 });

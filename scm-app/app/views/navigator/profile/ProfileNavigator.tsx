@@ -4,12 +4,14 @@ import Chats from "../../Chats";
 import Listings from "../../Listings";
 import SingleProduct from "../../SingleProduct";
 import { Product } from "../../../store/listings";
+import ChatWindow from "../../ChatWindow";
 
 export type ProfileNavigatorParamList = {
   profile: undefined;
   chats: undefined;
   listings: undefined;
   singleProduct: {product?: Product};
+  chatWindow: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProfileNavigatorParamList>();
@@ -25,6 +27,7 @@ const ProfileNavigator = () => {
       <Stack.Screen name="chats" component={Chats} />
       <Stack.Screen name="listings" component={Listings} />
       <Stack.Screen name="singleProduct" component={SingleProduct} />
+      <Stack.Screen name="chatWindow" component={ChatWindow}/>
     </Stack.Navigator>
   );
 };
