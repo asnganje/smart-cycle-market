@@ -14,8 +14,12 @@ const ImageSlider = ({ images }: ImageSliderProps) => {
     (info: {
       viewableItems: ViewToken<string>[];
       changed: ViewToken<string>[];
-    }) => {setActiveIdx(info.viewableItems[0].index || 0)},
+    }) => {
+      setActiveIdx(info.viewableItems[0].index || 0);
+    },
   );
+  if (!images?.length) return null;
+
   return (
     <View style={styles.container}>
       <FlatList

@@ -23,14 +23,18 @@ type ListingsRes = {
 
 const Listings = () => {
   const [listings, setListings] = useState<Product[]>([]);
+  const [fetching, setFetching] = useState(false);
   const { authClient } = useClient();
-  const { navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
+  const { navigate } =
+    useNavigation<NavigationProp<ProfileNavigatorParamList>>();
 
   const fetchListings = async () => {
+    setFetching(true);
     const res = await runAxiosAsync<ListingsRes>(
       authClient.get("/products/listings"),
     );
 
+    setFetching(false);
     if (res) {
       setListings(res.products);
     }
@@ -45,13 +49,20 @@ const Listings = () => {
       <View style={styles.container}>
         <AppHeader backButton={<BackButton />} />
         <FlatList
+          refreshing={fetching}
+          onRefresh={fetchListings}
           data={listings}
           contentContainerStyle={styles.flatlist}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity onPress={()=>navigate("singleProduct", {product: item})} style={styles.listItem}>
+              <TouchableOpacity
+                onPress={() => navigate("singleProduct", { product: item })}
+                style={styles.listItem}
+              >
                 <ProductImage uri={item.thumbnail} />
-                <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+                <Text style={styles.productName} numberOfLines={2}>
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             );
           }}
@@ -67,16 +78,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: size.padding,
   },
-  listItem:{
-    paddingBottom: size.padding
+  listItem: {
+    paddingBottom: size.padding,
   },
-  productName:{
-    fontWeight:"700",
-    fontSize:20,
+  productName: {
+    fontWeight: "700",
+    fontSize: 20,
     letterSpacing: s(1),
-    marginTop:vs(10)
+    marginTop: vs(10),
   },
-  flatlist:{
-    paddingBottom: vs(20)
-  }
+  flatlist: {
+    paddingBottom: vs(20),
+  },
 });
