@@ -5,4 +5,5 @@ export const Colors = {
   white: "#fff",
   gray: "#696969",
   backDrop: "rgba(255,255,255, 0.5)",
+  backDropDark: "rgba(0,0,0,0.5)",
 };

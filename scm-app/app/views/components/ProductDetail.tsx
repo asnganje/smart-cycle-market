@@ -8,6 +8,7 @@ import { s, vs } from "react-native-size-matters";
 import { Colors } from "../../utils/colors";
 import { formatPrice } from "../../utils/helper";
 import Profile from "../Profile";
+import ImageSlider from "./ImageSlider";
 
 interface IProductDetailProps {
   product: Product;
@@ -16,6 +17,7 @@ interface IProductDetailProps {
 const ProductDetail: FC<IProductDetailProps> = ({ product }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <ImageSlider images={product.images}/>
       <Text style={styles.category}>{product?.category}</Text>
       <Text style={styles.price}>{formatPrice(product?.price)}</Text>
       <Text style={styles.date}>
