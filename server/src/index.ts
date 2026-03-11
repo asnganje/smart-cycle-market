@@ -5,6 +5,7 @@ import dotenv from "dotenv"
 import formidable from "formidable";
 import path from "node:path";
 import productRouter from "./routes/product";
+import { sendErrorRes } from "./utils/helper";
 
 dotenv.config()
 const app = express();
@@ -33,6 +34,10 @@ app.post("/auth/upload-file", async (req,res)=> {
 app.use(function(err, req, res, next){
   res.status(500).json({message: err.message})
 } as express.ErrorRequestHandler)
+
+app.use("*", (req,res)=> {
+  sendErrorRes(res, "Not found!", 404)
+})
 
 const port = 3000;
 const uri = process.env.URI
