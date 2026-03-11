@@ -35,7 +35,7 @@ app.use(function(err, req, res, next){
   res.status(500).json({message: err.message})
 } as express.ErrorRequestHandler)
 
-app.use("*", (req,res)=> {
+app.use("/*", (req,res)=> {
   sendErrorRes(res, "Not found!", 404)
 })
 
