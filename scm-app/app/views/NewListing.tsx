@@ -27,6 +27,7 @@ import useClient from "../hooks/useClient";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import OptionSelector from "../ui/OptionSelector";
+import { selectImages } from "../utils/helper";
 
 const isIOS = Platform.OS === "ios";
 
@@ -66,22 +67,8 @@ const NewListing = () => {
   };
 
   const imageSelectionHandler = async () => {
-    try {
-      const { assets } = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: false,
-        quality: 0.3,
-        mediaTypes: ["images"],
-        allowsMultipleSelection: true,
-      });
-      if (!assets) return;
-      const imageUris = assets.map(({ uri }) => uri);
-      setImages([...images, ...imageUris]);
-    } catch (error) {
-      showMessage({
-        message: (error as any).message,
-        type: "danger",
-      });
-    }
+    const newImages = await selectImages()
+    setImages([...images, ...newImages]);
   };
 
   const submitHandler = async () => {
