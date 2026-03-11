@@ -11,7 +11,7 @@ import useAuth from "../../hooks/useAuth";
 import TabNavigator from "./tab/TabNavigator";
 import useClient from "../../hooks/useClient";
 
-type ProfileRes = {
+export type ProfileRes = {
   profile: {id: string;
   name: string;
   email: string;
