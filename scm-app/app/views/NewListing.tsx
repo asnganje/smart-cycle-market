@@ -15,10 +15,8 @@ import OptionModal from "./components/OptionModal";
 import { ReactNode, useState } from "react";
 import { categories } from "../utils/categories";
 import CategoryOption from "../ui/CategoryOption";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AppButton from "../ui/AppButton";
 import KeyBoardAvoider from "../ui/KeyBoardAvoider";
-import * as ImagePicker from "expo-image-picker";
 import { showMessage } from "react-native-flash-message";
 import HorizontalImageList from "./components/HorizontalImageList";
 import { newProductSchema, yupValidator } from "../utils/validator";
@@ -31,7 +29,7 @@ import { selectImages } from "../utils/helper";
 
 const isIOS = Platform.OS === "ios";
 
-interface Item {
+export interface Item {
   name: string;
   icon: ReactNode;
 }
@@ -112,7 +110,6 @@ const NewListing = () => {
       setProductInfo({...defaultInfo});
       setImages([])
     }
-    console.log(res);
   };
 
   return (
@@ -154,12 +151,6 @@ const NewListing = () => {
           }
         />
         <OptionSelector category={category} onPress={() => setShowCategoryModal(true)}/>
-        {/* <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
-          <View style={styles.categoryI}>
-            <Text>{category || "Category"}</Text>
-            <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
-          </View>
-        </TouchableOpacity> */}
         <FormInput
           placeholder="Description"
           value={description}
