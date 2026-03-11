@@ -102,6 +102,9 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
           if (option.name === "Delete") {
             onDeletePress();
           }
+          if (option.name === "Edit") {
+            navigate("editProduct", {product: product!})
+          }
         }}
       />
       <LoadingSpinnerAnimate visible={busy} />

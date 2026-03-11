@@ -26,6 +26,7 @@ import mime from "mime";
 import useClient from "../hooks/useClient";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import LoadingSpinner from "../ui/LoadingSpinner";
+import OptionSelector from "../ui/OptionSelector";
 
 const isIOS = Platform.OS === "ios";
 
@@ -165,12 +166,13 @@ const NewListing = () => {
             setProductInfo({ ...productInfo, purchaseDate: date })
           }
         />
-        <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
+        <OptionSelector category={category} onPress={() => setShowCategoryModal(true)}/>
+        {/* <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
           <View style={styles.categoryI}>
             <Text>{category || "Category"}</Text>
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <FormInput
           placeholder="Description"
           value={description}
@@ -221,15 +223,6 @@ const styles = StyleSheet.create({
   btnTitle: {
     color: Colors.primary,
     marginBottom: vs(20),
-  },
-  categoryI: {
-    marginBottom: vs(10),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: isIOS ? 0 : s(8),
-    borderWidth: isIOS ? 0 : 1,
-    borderColor: isIOS ? "" : Colors.deActive,
-    borderRadius: s(5),
   },
   iconContainer: {
     alignItems: "center",
