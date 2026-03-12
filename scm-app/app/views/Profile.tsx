@@ -1,4 +1,5 @@
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,7 +10,7 @@ import {
 import AvatarView from "../ui/AvatarView";
 import useAuth from "../hooks/useAuth";
 import { Colors } from "../utils/colors";
-import { vs } from "react-native-size-matters";
+import { s, vs } from "react-native-size-matters";
 import size from "../utils/size";
 import FormDivider from "../ui/FormDivider";
 import ProfileOptionListItem from "./components/ProfileOptionListItem";
@@ -27,9 +28,12 @@ import { showMessage } from "react-native-flash-message";
 const Profile = () => {
   const { authState, signOut } = useAuth();
   const { profile } = authState;
-  const {authClient} = useClient()
-  const dispatch = useDispatch()
+  const { authClient } = useClient();
+  const dispatch = useDispatch();
   const [userName, setUserName] = useState(profile?.name || "");
+  const [busy, setBusy] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
   const isNameChanged =
     profile?.name !== userName && userName.trim().length >= 3;
 
@@ -43,18 +47,62 @@ const Profile = () => {
     navigate("listings");
   };
 
-  const updateProfile = async () => {
-    const res = await runAxiosAsync<{profile: ProfileRes}>(authClient.patch("/auth/update-profile", {name: userName}))
+  const getVerificationLink = async () => {
+    setBusy(true);
+    const res = await runAxiosAsync<{ message: string }>(
+      authClient.get("/auth/verify-token"),
+    );
+    setBusy(false);
     if (res) {
       showMessage({
-        message:"Name successfully updated!",
-        type:"success"
-      })
-      dispatch(updateAuthState({profile: {...profile!, ...res.profile}, pending: false}))
+        message: res.message,
+        type: "success",
+      });
+    }
+  };
+
+  const fetchProfile = async () => {
+    setRefresh(true)
+    const res = await runAxiosAsync<{profile: ProfileRes}>(authClient.get("/auth/profile"))
+    setRefresh(false)
+    if(res) {
+      dispatch(updateAuthState({profile:{...profile!, ...res.profile}, pending: false}))
+    }
+  }
+
+  const updateProfile = async () => {
+    const res = await runAxiosAsync<{ profile: ProfileRes }>(
+      authClient.patch("/auth/update-profile", { name: userName }),
+    );
+    if (res) {
+      showMessage({
+        message: "Name successfully updated!",
+        type: "success",
+      });
+      dispatch(
+        updateAuthState({
+          profile: { ...profile!, ...res.profile },
+          pending: false,
+        }),
+      );
     }
   };
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView refreshControl={<RefreshControl refreshing={refresh} onRefresh={fetchProfile}/>} contentContainerStyle={styles.container}>
+      {!profile?.verified && (
+        <View style={styles.verificationLinkContainer}>
+          <Text style={styles.title}>
+            It looks like your profile is not verified!
+          </Text>
+          {busy ? (
+            <Text style={styles.link}>Please wait...</Text>
+          ) : (
+            <Text style={styles.link} onPress={getVerificationLink}>
+              Tap here to verify!
+            </Text>
+          )}
+        </View>
+      )}
       <View style={styles.profileContainer}>
         <AvatarView size={80} uri={profile?.avatar} />
         <View style={styles.profileInfo}>
@@ -128,5 +176,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  verificationLinkContainer: {
+    padding: vs(10),
+    backgroundColor: Colors.deActive,
+    marginVertical: vs(10),
+    borderRadius: s(5),
+  },
+  title: {
+    fontWeight: "600",
+    color: Colors.primary,
+    textAlign: "center",
+  },
+  link: {
+    fontWeight: "600",
+    color: Colors.active,
+    textAlign: "center",
+    paddingTop: vs(5),
   },
 });

@@ -6,6 +6,7 @@ export type Profile = {
   email: string;
   name: string;
   avatar?:any,
+  verified?:boolean,
   tokens: {
     refresh: string;
     access: string;

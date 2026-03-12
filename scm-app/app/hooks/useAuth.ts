@@ -17,6 +17,7 @@ export interface SignInRes {
     email: string;
     name: string;
     avatar: string;
+    // verified:boolean,
     tokens: {
       refresh: string;
       access: string;
