@@ -76,7 +76,7 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
     return sendErrorRes(res, "Unauthorized request", 401);
   }
   const newAccessToken = jwt.sign({ id: user._id }, JWT_SECRET, {
-    expiresIn: "1m",
+    expiresIn: "5m",
   });
   const newRefreshToken = jwt.sign({ id: user._id }, JWT_SECRET);
 
@@ -99,7 +99,7 @@ export const login: RequestHandler = async (req, res) => {
 
   const payload = { id: user._id };
   const accessToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: "1m",
+    expiresIn: "5m",
   });
   const refreshToken = jwt.sign(payload, JWT_SECRET);
   
