@@ -24,6 +24,9 @@ import { ProfileRes } from "./navigator";
 import { useDispatch } from "react-redux";
 import { updateAuthState } from "../store/auth";
 import { showMessage } from "react-native-flash-message";
+import { selectImages } from "../utils/helper";
+import mime from "mime";
+import LoadingSpinnerAnimate from "../ui/LoadingSpinnerAnimate";
 
 const Profile = () => {
   const { authState, signOut } = useAuth();
@@ -32,6 +35,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const [userName, setUserName] = useState(profile?.name || "");
   const [busy, setBusy] = useState(false);
+  const [updatingAvatar, setUpdatingAvatar] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
   const isNameChanged =
@@ -62,13 +66,47 @@ const Profile = () => {
   };
 
   const fetchProfile = async () => {
-    setRefresh(true)
-    const res = await runAxiosAsync<{profile: ProfileRes}>(authClient.get("/auth/profile"))
-    setRefresh(false)
-    if(res) {
-      dispatch(updateAuthState({profile:{...profile!, ...res.profile}, pending: false}))
+    setRefresh(true);
+    const res = await runAxiosAsync<{ profile: ProfileRes }>(
+      authClient.get("/auth/profile"),
+    );
+    setRefresh(false);
+    if (res) {
+      dispatch(
+        updateAuthState({
+          profile: { ...profile!, ...res.profile },
+          pending: false,
+        }),
+      );
     }
-  }
+  };
+
+  const handleProfileImageSelection = async () => {
+    const [image] = await selectImages({
+      allowsEditing: true,
+      allowsMultipleSelection: false,
+      aspect: [1, 1],
+    });
+
+    if (image) {
+      const formData = new FormData();
+      formData.append("avatar", {
+        name: "Avatar",
+        uri: image,
+        type: mime.getType(image),
+      } as any);
+      setUpdatingAvatar(true)
+      const res = await runAxiosAsync<{profile: ProfileRes}>(authClient.patch("/auth/update-avatar", formData, {
+        headers:{
+          "Content-Type":"multipart/form-data"
+        }
+      }));
+      setUpdatingAvatar(false)
+      if (res) {
+        dispatch(updateAuthState({profile: {...profile!, ...res.profile }, pending:false}))
+      }
+    }
+  };
 
   const updateProfile = async () => {
     const res = await runAxiosAsync<{ profile: ProfileRes }>(
@@ -88,7 +126,12 @@ const Profile = () => {
     }
   };
   return (
-    <ScrollView refreshControl={<RefreshControl refreshing={refresh} onRefresh={fetchProfile}/>} contentContainerStyle={styles.container}>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refresh} onRefresh={fetchProfile} />
+      }
+      contentContainerStyle={styles.container}
+    >
       {!profile?.verified && (
         <View style={styles.verificationLinkContainer}>
           <Text style={styles.title}>
@@ -104,7 +147,11 @@ const Profile = () => {
         </View>
       )}
       <View style={styles.profileContainer}>
-        <AvatarView size={80} uri={profile?.avatar} />
+        <AvatarView
+          size={80}
+          uri={profile?.avatar}
+          onPress={handleProfileImageSelection}
+        />
         <View style={styles.profileInfo}>
           <View style={styles.nameContainer}>
             <TextInput
@@ -142,6 +189,7 @@ const Profile = () => {
         title="Logout"
         onPress={signOut}
       />
+      <LoadingSpinnerAnimate visible={updatingAvatar}/>
     </ScrollView>
   );
 };

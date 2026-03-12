@@ -1,21 +1,23 @@
 import { FC } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "../utils/colors";
 
 interface IAvatarViewProps {
   uri?: string;
   size?: number;
+  onPress?:()=>void;
 }
 
 const iconContainerFactor = 0.7;
 const iconSizeFactor = 0.8;
 
-const AvatarView: FC<IAvatarViewProps> = ({ uri, size = 50 }) => {
+const AvatarView: FC<IAvatarViewProps> = ({ uri, onPress, size = 50 }) => {
   const iconContainerSize = size * iconContainerFactor;
   const iconSize = size * iconSizeFactor;
   return (
-    <View
+    <TouchableOpacity
+    onPress={onPress}
       style={[
         { width: size, height: size, borderRadius: size / 2 },
         styles.container,
@@ -38,7 +40,7 @@ const AvatarView: FC<IAvatarViewProps> = ({ uri, size = 50 }) => {
           <FontAwesome name="user" size={iconSize} color={Colors.white} />
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 export default AvatarView;
