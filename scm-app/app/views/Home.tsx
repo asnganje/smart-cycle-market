@@ -4,6 +4,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AppStackParamList } from "./navigator/app/AppNavigator";
 import SearchBar from "./components/SearchBar";
 import size from "../utils/size";
+import CategoryList from "./components/CategoryList";
 
 const Home = () => {
   const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
@@ -12,6 +13,7 @@ const Home = () => {
       <ChatNotification onPress={() => navigate("chats")} />
       <View style={styles.container}>
         <SearchBar />
+        <CategoryList onPress={()=>navigate("productList")} />
       </View>
     </>
   );

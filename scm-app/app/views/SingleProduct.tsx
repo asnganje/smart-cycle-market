@@ -19,6 +19,22 @@ import { useDispatch } from "react-redux";
 import { deleteItem } from "../store/listings";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 
+export type Product = {
+  id: string;
+  name: string;
+  thumbnail?: string;
+  category: string;
+  price: number;
+  images?: string[];
+  date: string;
+  description: string;
+  seller: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+};
+
 type SingleProductProps = NativeStackScreenProps<
   ProfileNavigatorParamList,
   "singleProduct"
@@ -43,7 +59,8 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
   const isAdmin = authState.profile?.id === product?.seller.id;
   const [showMenu, setShowMenu] = useState(false);
   const dispatch = useDispatch();
-  const {navigate} = useNavigation<NavigationProp<ProfileNavigatorParamList>>()
+  const { navigate } =
+    useNavigation<NavigationProp<ProfileNavigatorParamList>>();
 
   const confirmDelete = async () => {
     const id = product?.id;
@@ -84,7 +101,10 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
       />
       <View>
         {product ? <ProductDetail product={product} /> : <></>}
-        <TouchableOpacity onPress={()=>navigate("chatWindow")} style={styles.messageBtn}>
+        <TouchableOpacity
+          onPress={() => navigate("chatWindow")}
+          style={styles.messageBtn}
+        >
           <AntDesign name="message" size={20} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -103,7 +123,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
             onDeletePress();
           }
           if (option.name === "Edit") {
-            navigate("editProduct", {product: product!})
+            navigate("editProduct", { product: product! });
           }
         }}
       />
@@ -122,15 +142,15 @@ const styles = StyleSheet.create({
     paddingLeft: s(5),
     color: Colors.primary,
   },
-  messageBtn:{
+  messageBtn: {
     width: s(50),
-    height:s(50),
-    borderRadius:s(25),
-    backgroundColor:Colors.active,
-    justifyContent:"center",
-    alignItems:"center",
-    position:"absolute",
-    right:s(20),
-    bottom:s(40)
-  }
+    height: s(50),
+    borderRadius: s(25),
+    backgroundColor: Colors.active,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    right: s(20),
+    bottom: s(40),
+  },
 });

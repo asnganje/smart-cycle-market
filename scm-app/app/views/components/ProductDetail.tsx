@@ -1,5 +1,4 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Product } from "../SingleProduct";
 import { FC } from "react";
 import { formatDate } from "../../utils/date";
 import size from "../../utils/size";
@@ -7,8 +6,8 @@ import AvatarView from "../../ui/AvatarView";
 import { s, vs } from "react-native-size-matters";
 import { Colors } from "../../utils/colors";
 import { formatPrice } from "../../utils/helper";
-import Profile from "../Profile";
 import ImageSlider from "./ImageSlider";
+import { Product } from "../SingleProduct";
 
 interface IProductDetailProps {
   product: Product;
