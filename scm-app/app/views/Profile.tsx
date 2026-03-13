@@ -149,7 +149,7 @@ const Profile = () => {
       <View style={styles.profileContainer}>
         <AvatarView
           size={80}
-          uri={profile?.avatar}
+          uri={profile?.avatar?.url}
           onPress={handleProfileImageSelection}
         />
         <View style={styles.profileInfo}>
