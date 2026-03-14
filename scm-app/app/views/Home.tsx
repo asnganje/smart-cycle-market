@@ -73,7 +73,7 @@ const Home = () => {
       <ChatNotification onPress={() => navigate("chats")} />
       <ScrollView style={styles.container}>
         <SearchBar />
-        <CategoryList onPress={() => navigate("productList")} />
+        <CategoryList onPress={(category) => navigate("productList", {category})} />
         <LatestProductList data={products} onPress={({id})=>navigate("singleProduct", {id})}/>
       </ScrollView>
     </>

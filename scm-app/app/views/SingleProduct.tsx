@@ -93,12 +93,10 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
   };
 
   const fetchProductInfo = async (id: string) => {
-    console.log(id);
-    
     const res = await runAxiosAsync<{ product: Product }>(
       authClient.get("/products/detail/" + id),
     );
-    
+
     if (res) {
       setProductInfo(res.product);
     }
@@ -108,7 +106,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
     if (id) fetchProductInfo(id);
     if (product) setProductInfo(product);
   }, [id, product]);
-  
+
   return (
     <>
       <AppHeader

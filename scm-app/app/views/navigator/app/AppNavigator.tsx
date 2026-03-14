@@ -7,7 +7,7 @@ import SingleProduct, { Product } from "../../SingleProduct";
 export type AppStackParamList = {
   home: undefined;
   chats: undefined;
-  productList: undefined;
+  productList: {category: string};
   singleProduct:  {product?: Product, id?: string};
 };
 
