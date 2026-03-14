@@ -1,11 +1,8 @@
 import { FC } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { LatestProduct } from "./LatestProductList";
 import GridView from "../../ui/GridView";
-import { formatPrice } from "../../utils/helper";
-import { Colors } from "../../utils/colors";
-import { s, vs } from "react-native-size-matters";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import ProductCard from "../../ui/ProductCard";
 
 interface IProductGridViewProps {
   data: LatestProduct[];
@@ -16,59 +13,9 @@ const ProductGridView: FC<IProductGridViewProps> = ({ data, onPress }) => {
   return (
     <GridView
       data={data}
-      renderItem={(item) => {
-        return (
-          <TouchableOpacity
-            onPress={() => onPress(item)}
-            style={styles.productContainer}
-          >
-            {item.thumbnail ? (
-              <Image
-                source={{ uri: item.thumbnail }}
-                style={styles.thumbnail}
-              />
-            ) : (
-              <View style={[styles.thumbnail, styles.noImageView]}>
-                <MaterialCommunityIcons
-                  name="image-off"
-                  size={35}
-                  color={Colors.primary}
-                />
-              </View>
-            )}
-            <Text style={styles.price}>{formatPrice(item.price)}</Text>
-            <Text style={styles.name}>{item.name}</Text>
-          </TouchableOpacity>
-        );
-      }}
+      renderItem={(item) => <ProductCard product={item} onPress={onPress} />}
     />
   );
 };
 export default ProductGridView;
-const styles = StyleSheet.create({
-  name: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.primary,
-  },
-  productContainer: {
-    padding: s(10),
-  },
-  thumbnail: {
-    width: "100%",
-    height: vs(100),
-    borderRadius: 5,
-  },
-  noImageView:{
-    backgroundColor: Colors.deActive,
-    alignItems:"center",
-    justifyContent:"center",
-    borderRadius:5
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.active,
-    paddingTop: vs(4),
-  },
-});
+const styles = StyleSheet.create({});
