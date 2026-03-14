@@ -5,7 +5,6 @@ import { FC, useEffect, useState } from "react";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import useClient from "../hooks/useClient";
 import { LatestProduct } from "./components/LatestProductList";
-import ProductGridView from "./components/ProductGridView";
 import { Colors } from "../utils/colors";
 import { vs } from "react-native-size-matters";
 import size from "../utils/size";
@@ -19,12 +18,14 @@ type ProductListProps = NativeStackScreenProps<
   "productList"
 >;
 
+const col = 2;
+
 const ProductList: FC<ProductListProps> = ({ route, navigation }) => {
   const { category } = route.params;
   const [products, setProducts] = useState<LatestProduct[]>([]);
   const { authClient } = useClient();
 
-  const isOdd = products.length % 2 !== 0
+  const isOdd = products.length % col !== 0;
 
   const fetchProducts = async (category: string) => {
     const res = await runAxiosAsync<{ products: LatestProduct[] }>(
@@ -59,13 +60,15 @@ const ProductList: FC<ProductListProps> = ({ route, navigation }) => {
       />
       <FlatList
         data={products}
-        numColumns={2}
+        numColumns={col}
         renderItem={({ item, index }) => (
-          <View style={{flex: isOdd && index === products.length-1 ? 0.5 : 1}}>
-          <ProductCard
-            product={item}
-            onPress={({ id }) => navigation.navigate("singleProduct", { id })}
-          />
+          <View
+            style={{ flex: isOdd && index === products.length - 1 ? 0.5 : 1 }}
+          >
+            <ProductCard
+              product={item}
+              onPress={({ id }) => navigation.navigate("singleProduct", { id })}
+            />
           </View>
         )}
       />
