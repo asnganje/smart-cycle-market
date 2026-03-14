@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ProfileNavigatorParamList } from "./navigator/profile/ProfileNavigator";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import AppHeader from "./components/AppHeader";
 import BackButton from "../ui/BackButton";
 import ProductDetail from "./components/ProductDetail";
@@ -52,10 +52,11 @@ const menuOptions = [
 ];
 
 const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
-  const { product } = route.params;
+  const { product, id } = route.params;
   const { authState } = useAuth();
   const { authClient } = useClient();
   const [busy, setBusy] = useState(false);
+  const [productInfo, setProductInfo] = useState<Product>();
   const isAdmin = authState.profile?.id === product?.seller.id;
   const [showMenu, setShowMenu] = useState(false);
   const dispatch = useDispatch();
@@ -91,6 +92,23 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
     );
   };
 
+  const fetchProductInfo = async (id: string) => {
+    console.log(id);
+    
+    const res = await runAxiosAsync<{ product: Product }>(
+      authClient.get("/products/detail/" + id),
+    );
+    
+    if (res) {
+      setProductInfo(res.product);
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchProductInfo(id);
+    if (product) setProductInfo(product);
+  }, [id, product]);
+  
   return (
     <>
       <AppHeader
@@ -99,8 +117,8 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
           <OptionBtn visible={isAdmin} onPress={() => setShowMenu(true)} />
         }
       />
-      <View>
-        {product ? <ProductDetail product={product} /> : <></>}
+      <View style={{ position: "relative", flex: 1 }}>
+        {productInfo ? <ProductDetail product={productInfo} /> : <></>}
         <TouchableOpacity
           onPress={() => navigate("chatWindow")}
           style={styles.messageBtn}
@@ -151,6 +169,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     right: s(20),
-    bottom: s(40),
+    bottom: s(20),
   },
 });

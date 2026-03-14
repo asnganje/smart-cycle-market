@@ -11,7 +11,7 @@ export type ProfileNavigatorParamList = {
   profile: undefined;
   chats: undefined;
   listings: undefined;
-  singleProduct: {product?: Product};
+  singleProduct: {product?: Product, id?: string};
   editProduct: {product: Product};
   chatWindow: undefined;
 };

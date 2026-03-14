@@ -5,10 +5,11 @@ import GridView from "../../ui/GridView";
 import { formatPrice } from "../../utils/helper";
 import { Colors } from "../../utils/colors";
 import { s, vs } from "react-native-size-matters";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface IProductGridViewProps {
   data: LatestProduct[];
-  onPress(item: LatestProduct): void
+  onPress(item: LatestProduct): void;
 }
 
 const ProductGridView: FC<IProductGridViewProps> = ({ data, onPress }) => {
@@ -17,8 +18,24 @@ const ProductGridView: FC<IProductGridViewProps> = ({ data, onPress }) => {
       data={data}
       renderItem={(item) => {
         return (
-          <TouchableOpacity onPress={()=>onPress(item)} style={styles.productContainer}>
-            <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+          <TouchableOpacity
+            onPress={() => onPress(item)}
+            style={styles.productContainer}
+          >
+            {item.thumbnail ? (
+              <Image
+                source={{ uri: item.thumbnail }}
+                style={styles.thumbnail}
+              />
+            ) : (
+              <View style={[styles.thumbnail, styles.noImageView]}>
+                <MaterialCommunityIcons
+                  name="image-off"
+                  size={35}
+                  color={Colors.primary}
+                />
+              </View>
+            )}
             <Text style={styles.price}>{formatPrice(item.price)}</Text>
             <Text style={styles.name}>{item.name}</Text>
           </TouchableOpacity>
@@ -34,13 +51,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: Colors.primary,
   },
-  productContainer:{
-    padding:s(10),
+  productContainer: {
+    padding: s(10),
   },
   thumbnail: {
     width: "100%",
     height: vs(100),
     borderRadius: 5,
+  },
+  noImageView:{
+    backgroundColor: Colors.deActive,
+    alignItems:"center",
+    justifyContent:"center",
+    borderRadius:5
   },
   price: {
     fontSize: 16,
