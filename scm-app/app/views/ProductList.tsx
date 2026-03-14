@@ -63,7 +63,7 @@ const ProductList: FC<ProductListProps> = ({ route, navigation }) => {
         numColumns={col}
         renderItem={({ item, index }) => (
           <View
-            style={{ flex: isOdd && index === products.length - 1 ? 0.5 : 1 }}
+            style={{ flex: isOdd && index === products.length - 1 ? 1/col : 1 }}
           >
             <ProductCard
               product={item}
