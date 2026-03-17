@@ -5,10 +5,14 @@ import { AppStackParamList } from "./navigator/app/AppNavigator";
 import SearchBar from "./components/SearchBar";
 import size from "../utils/size";
 import CategoryList from "./components/CategoryList";
-import LatestProductList, { LatestProduct } from "./components/LatestProductList";
+import LatestProductList, {
+  LatestProduct,
+} from "./components/LatestProductList";
 import { useEffect, useState } from "react";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import useClient from "../hooks/useClient";
+import socket from "../socket";
+import useAuth from "../hooks/useAuth";
 
 const testData = [
   {
@@ -54,27 +58,55 @@ const testData = [
 ];
 
 const Home = () => {
-  const [products, setProducts] = useState<LatestProduct[]>([])
+  const [products, setProducts] = useState<LatestProduct[]>([]);
   const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
-  const { authClient } = useClient()
-  
-  const fetchProducts = async () => {
-    const res = await runAxiosAsync<{products: LatestProduct[]}>(authClient.get("/products/latest"))
-    if(res?.products){
-      setProducts(res.products)
-    }
-  }
+  const { authClient } = useClient();
+  const { authState } = useAuth();
 
-  useEffect(()=>{
-    fetchProducts()
-  }, [])
+  const fetchProducts = async () => {
+    const res = await runAxiosAsync<{ products: LatestProduct[] }>(
+      authClient.get("/products/latest"),
+    );
+    if (res?.products) {
+      setProducts(res.products);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    socket.auth = { token: authState.profile?.tokens.access };
+    socket.connect();
+    socket.on("connect", () => {
+      console.log("connected: ", socket.connected);
+    });
+
+    socket.on("disconnect", () => {
+      console.log(socket.connected);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.log("Error in socket: ", error.message);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   return (
     <>
       <ChatNotification onPress={() => navigate("chats")} />
       <ScrollView style={styles.container}>
         <SearchBar />
-        <CategoryList onPress={(category) => navigate("productList", {category})} />
-        <LatestProductList data={products} onPress={({id})=>navigate("singleProduct", {id})}/>
+        <CategoryList
+          onPress={(category) => navigate("productList", { category })}
+        />
+        <LatestProductList
+          data={products}
+          onPress={({ id }) => navigate("singleProduct", { id })}
+        />
       </ScrollView>
     </>
   );
