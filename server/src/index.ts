@@ -9,6 +9,7 @@ import { sendErrorRes } from "./utils/helper";
 import http from "http";
 import { Server } from "socket.io";
 import { TokenExpiredError, verify } from "jsonwebtoken";
+import morgan from "morgan";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,7 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
+app.use(morgan("dev"))
 app.use(express.static("src/public"));
 
 // reading content from a form
@@ -31,7 +33,7 @@ io.use((socket, next) => {
   const socketReq = socket.handshake.auth as { token: string } | undefined;
 
   if (!socketReq?.token) {
-    return next(new Error("Unauthorized request"));
+    return next(new Error("Unauthorized request!"));
   }
 
   try {
@@ -46,7 +48,9 @@ io.use((socket, next) => {
   next();
 });
 
-io.on("connection", () => {
+io.on("connection", (socket) => {
+  console.log(socket.data);
+  
   console.log("User is connected");
 });
 

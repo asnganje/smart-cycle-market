@@ -11,8 +11,9 @@ import LatestProductList, {
 import { useEffect, useState } from "react";
 import { runAxiosAsync } from "../api/runAxiosAsync";
 import useClient from "../hooks/useClient";
-import socket from "../socket";
+import socket, { handleSocketConnection } from "../socket";
 import useAuth from "../hooks/useAuth";
+import { useDispatch } from "react-redux";
 
 const testData = [
   {
@@ -62,6 +63,7 @@ const Home = () => {
   const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
   const { authClient } = useClient();
   const { authState } = useAuth();
+  const dispatch = useDispatch();
 
   const fetchProducts = async () => {
     const res = await runAxiosAsync<{ products: LatestProduct[] }>(
@@ -77,20 +79,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    socket.auth = { token: authState.profile?.tokens.access };
-    socket.connect();
-    socket.on("connect", () => {
-      console.log("connected: ", socket.connected);
-    });
-
-    socket.on("disconnect", () => {
-      console.log(socket.connected);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.log("Error in socket: ", error.message);
-    });
-
+    if (authState.profile) handleSocketConnection(authState.profile, dispatch);
     return () => {
       socket.disconnect();
     };

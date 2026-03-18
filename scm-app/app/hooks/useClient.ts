@@ -6,7 +6,7 @@ import { runAxiosAsync } from "../api/runAxiosAsync";
 import { useDispatch, useSelector } from "react-redux";
 import { getAuthState, updateAuthState } from "../store/auth";
 
-type Response = {
+export type Response = {
   tokens: {
     refresh: string;
     access: string;
