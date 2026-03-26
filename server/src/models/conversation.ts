@@ -1,5 +1,4 @@
 import { Document, model, ObjectId, Schema } from "mongoose";
-import { boolean } from "yup";
 
 interface Chat {
   _id: ObjectId,
@@ -43,7 +42,7 @@ const schema = new Schema<ConversationDocument>({
         default: Date.now
       },
       viewed:{
-        type: boolean,
+        type: Boolean,
         default: false
       }
     }
