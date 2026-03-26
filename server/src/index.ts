@@ -10,6 +10,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { TokenExpiredError, verify } from "jsonwebtoken";
 import morgan from "morgan";
+import conversationRouter from "./routes/conversation";
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
 app.use("/products", productRouter);
+app.use("/conversation", conversationRouter);
 
 io.use((socket, next) => {
   const socketReq = socket.handshake.auth as { token: string } | undefined;

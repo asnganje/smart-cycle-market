@@ -51,3 +51,4 @@ const schema = new Schema<ConversationDocument>({
 }, {timestamps: true})
 
 const ConverSationModel = model("Conversation", schema)
+export default ConverSationModel;
