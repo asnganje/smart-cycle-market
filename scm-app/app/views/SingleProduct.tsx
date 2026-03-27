@@ -18,6 +18,7 @@ import LoadingSpinnerAnimate from "../ui/LoadingSpinnerAnimate";
 import { useDispatch } from "react-redux";
 import { deleteItem } from "../store/listings";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
+import ChatIcon from "./components/ChatIcon";
 
 export type Product = {
   id: string;
@@ -56,6 +57,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
   const { authState } = useAuth();
   const { authClient } = useClient();
   const [busy, setBusy] = useState(false);
+  const [fetchingChatId, setFetchingChatId] = useState(false);
   const [productInfo, setProductInfo] = useState<Product>();
   const isAdmin = authState.profile?.id === product?.seller.id;
   const [showMenu, setShowMenu] = useState(false);
@@ -104,10 +106,11 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
 
   const onChatBtnPress = async () => {
     if(!productInfo) return
+    setFetchingChatId(true)
     const res = await runAxiosAsync<{conversationId: string}>(
       authClient.get(`/conversation/with/${productInfo.seller.id}`),
     );
-
+    setFetchingChatId(false)
     if(res){
       navigation.navigate("chatWindow", {conversationId: res.conversationId, peerProfile:productInfo.seller})
     }
@@ -128,9 +131,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
       />
       <View style={{ position: "relative", flex: 1 }}>
         {productInfo ? <ProductDetail product={productInfo} /> : <></>}
-        <TouchableOpacity onPress={onChatBtnPress} style={styles.messageBtn}>
-          <AntDesign name="message" size={20} color={Colors.white} />
-        </TouchableOpacity>
+        <ChatIcon busy={fetchingChatId} onPress={onChatBtnPress}/>
       </View>
       <OptionModal
         options={menuOptions}
@@ -165,16 +166,5 @@ const styles = StyleSheet.create({
   optionTitle: {
     paddingLeft: s(5),
     color: Colors.primary,
-  },
-  messageBtn: {
-    width: s(50),
-    height: s(50),
-    borderRadius: s(25),
-    backgroundColor: Colors.active,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    right: s(20),
-    bottom: s(20),
-  },
+  }
 });
