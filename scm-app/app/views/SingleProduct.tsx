@@ -59,7 +59,7 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
   const [busy, setBusy] = useState(false);
   const [fetchingChatId, setFetchingChatId] = useState(false);
   const [productInfo, setProductInfo] = useState<Product>();
-  const isAdmin = authState.profile?.id === product?.seller.id;
+  const isAdmin = authState.profile?.id === productInfo?.seller.id;
   const [showMenu, setShowMenu] = useState(false);
   const dispatch = useDispatch();
   const { navigate } =
@@ -132,6 +132,8 @@ const SingleProduct: FC<SingleProductProps> = ({ route, navigation }) => {
       <View style={{ position: "relative", flex: 1 }}>
         {productInfo ? <ProductDetail product={productInfo} /> : <></>}
         <ChatIcon busy={fetchingChatId} onPress={onChatBtnPress}/>
+        {/* if same owner logic */}
+        {/* {!isAdmin && <ChatIcon busy={fetchingChatId} onPress={onChatBtnPress}/>} */}
       </View>
       <OptionModal
         options={menuOptions}
